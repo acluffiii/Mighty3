@@ -1,0 +1,52 @@
+workflows:
+  haildeck-simulator-preview:
+    name: HailDeck — Simulator Build + Screenshot
+    max_build_duration: 30
+    instance_type: mac_mini_m2
+    environment:
+      xcode: latest
+      vars:
+        SIM_DEVICE: "iPhone 15"
+        BUNDLE_ID: "com.cluffwork.haildeck"
+    scripts:
+      - name: Install XcodeGen
+        script: |
+          brew install xcodegen
+
+      - name: Generate Xcode project from project.yml
+        script: |
+          xcodegen generate
+
+      - name: Build for iOS Simulator
+        script: |
+          xcodebuild \
+            -project HailDeck.xcodeproj \
+            -scheme HailDeck \
+            -sdk iphonesimulator \
+            -destination "platform=iOS Simulator,name=$SIM_DEVICE" \
+            -derivedDataPath build \
+            build
+
+      - name: Boot simulator, install, launch, screenshot
+        script: |
+          APP_PATH=$(find build -name "HailDeck.app" | head -n1)
+          xcrun simctl boot "$SIM_DEVICE" || true
+          xcrun simctl bootstatus "$SIM_DEVICE" -b
+          xcrun simctl install "$SIM_DEVICE" "$APP_PATH"
+          xcrun simctl launch "$SIM_DEVICE" "$BUNDLE_ID"
+          sleep 5
+          xcrun simctl io "$SIM_DEVICE" screenshot haildeck_preview.png
+
+    artifacts:
+      - build/**/*.app
+      - haildeck_preview.png
+
+# Notes:
+# - This workflow only needs a free Codemagic account — no Apple Developer Program
+#   enrollment, no signing certificates. Simulator builds don't require code signing.
+# - Output: haildeck_preview.png in the build artifacts tab — an actual screenshot
+#   of the running app, viewable from any device.
+# - To install on a physical iPhone instead of just previewing, you'll need an
+#   Apple Developer account ($99/yr) and to add code signing in the Codemagic
+#   dashboard (Team settings → Code signing identities). That's a separate step
+#   from this one — this workflow is just for seeing it run.

@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <defs>
+    <linearGradient id="hatGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e8d5a8"/>
+      <stop offset="100%" stop-color="#c9a968"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ears, floppy, behind the head -->
+  <path d="M 108 175 Q 60 220 78 300 Q 92 340 128 330 Q 108 270 118 200 Z" fill="#141414"/>
+  <path d="M 292 175 Q 340 220 322 300 Q 308 340 272 330 Q 292 270 282 200 Z" fill="#141414"/>
+
+  <!-- head -->
+  <path d="M 200 150
+           Q 130 150 118 235
+           Q 112 300 150 340
+           Q 175 365 200 365
+           Q 225 365 250 340
+           Q 288 300 282 235
+           Q 270 150 200 150 Z" fill="#181818"/>
+
+  <!-- snout / muzzle, brown -->
+  <path d="M 200 250
+           Q 155 252 150 300
+           Q 148 330 175 340
+           Q 200 348 200 348
+           Q 200 348 225 340
+           Q 252 330 250 300
+           Q 245 252 200 250 Z" fill="#8a5a2b"/>
+
+  <!-- nose -->
+  <ellipse cx="200" cy="278" rx="20" ry="14" fill="#100a06"/>
+
+  <!-- mouth -->
+  <path d="M 168 322 Q 200 340 232 322" stroke="#100a06" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <path d="M 200 300 L 200 322" stroke="#100a06" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+  <!-- hat brim, wide, tilted down to cover the eyes -->
+  <ellipse cx="200" cy="188" rx="150" ry="42" fill="url(#hatGrad)" stroke="#a8874a" stroke-width="3"/>
+  <ellipse cx="200" cy="188" rx="150" ry="42" fill="none" stroke="#00000018" stroke-width="10"
+           transform="translate(0,6)" opacity="0.4"/>
+
+  <!-- hat crown -->
+  <path d="M 138 176
+           Q 132 118 200 108
+           Q 268 118 262 176
+           Q 232 190 200 190
+           Q 168 190 138 176 Z" fill="url(#hatGrad)" stroke="#a8874a" stroke-width="3"/>
+
+  <!-- hat band -->
+  <path d="M 140 172 Q 200 186 260 172" stroke="#3a2a18" stroke-width="10" fill="none" stroke-linecap="round"/>
+  <circle cx="200" cy="179" r="6" fill="#e8d5a8"/>
+
+  <!-- brim front edge shadow line, for a bit of dimension -->
+  <path d="M 60 190 Q 200 232 340 190" stroke="#00000022" stroke-width="6" fill="none" stroke-linecap="round"/>
+</svg>

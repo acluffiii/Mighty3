@@ -1,0 +1,47 @@
+name: HailDeck
+options:
+  bundleIdPrefix: com.cluffwork
+  deploymentTarget:
+    iOS: "16.0"
+
+targets:
+  HailDeck:
+    type: application
+    platform: iOS
+    sources:
+      - path: HailDeck
+    info:
+      path: HailDeck/Info.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.cluffwork.haildeck
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        TARGETED_DEVICE_FAMILY: "1"
+        SWIFT_VERSION: "5.0"
+        INFOPLIST_KEY_UILaunchScreen_Generation: "YES"
+        GENERATE_INFOPLIST_FILE: "NO"
+    dependencies:
+      - target: DentDOGWidgetExtension
+        embed: true
+
+  DentDOGWidgetExtension:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "17.0"   # containerBackground(for:) and this AppIntent
+                                # pattern need 17+ — the main app target stays
+                                # on 16.0 above; targets can differ within one
+                                # Xcode project, this isn't a project-wide bump
+    sources:
+      - path: DentDOGWidget
+    info:
+      path: DentDOGWidget/Info.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.cluffwork.haildeck.widget
+        PRODUCT_NAME: DentDOGWidget
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        TARGETED_DEVICE_FAMILY: "1"
+        SWIFT_VERSION: "5.0"
+        GENERATE_INFOPLIST_FILE: "NO"
