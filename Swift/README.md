@@ -4,27 +4,22 @@
 Standalone SwiftUI app — separate codebase from Dent Dial. Same estimating niche
 (hail damage, panel-by-panel), different product.
 
-## Rename scope — what changed and what didn't
+## Rename scope — completed
 
-Renamed everywhere it's user-facing or internally consistent to rename:
-app title text in the UI, the PDF export header, exported filenames, the icon
-(now a grinning dog face on the front card instead of the letter H), Keychain/
-UserDefaults storage keys, the OAuth redirect URL scheme (`dentdog://...`,
-kept in sync with Info.plist's `CFBundleURLSchemes`), `NSCameraUsageDescription`,
-`manifest.json`'s `name`/`short_name` on the web build.
+Full rename from HailDeck to DentDOG: UI text, PDF headers, exported filenames,
+app icon, Keychain/UserDefaults keys, OAuth redirect URL scheme (`dentdog://...`),
+`NSCameraUsageDescription`, `manifest.json` name/short_name on the web build,
+source folder (`DentDOG/`), entry point (`DentDOGApp.swift`), XcodeGen project
+and target name (`DentDOG`), and Codemagic workflow/scheme/artifact references.
 
-**Deliberately NOT renamed**: the Xcode project/target name, bundle identifier,
-the `HailDeck/` folder itself, `HailDeckApp.swift`'s filename and struct name,
-and the web build's actual filename (`haildeck.html`). Renaming an Xcode
-target/bundle ID is a structural operation with cascading effects (signing,
-provisioning, project.yml references) that's safer done interactively in
-Xcode itself than via a blind find-replace across project files — so the app
-now *displays* as DentDOG everywhere, but the underlying project scaffolding
-still says HailDeck internally. Say the word if you want that done too.
+The bundle identifier (`com.cluffwork.haildeck`) was intentionally left as-is —
+changing a bundle ID breaks the App Store record, TestFlight builds, and any
+existing device installs. Rename it in Xcode's Signing & Capabilities tab only
+when you're ready to treat it as a new App Store listing.
 
 ## What's here
 
-- `HailDeckApp.swift` — entry point
+- `DentDOGApp.swift` — entry point
 - `Models.swift` — 20-card deck model, `DentBracket`, the exact-rule pricing
   engine (`Pricing` enum), and `VehicleDeckState` (wraps one vehicle's full deck
   so the app can hold two and switch between them)
@@ -56,7 +51,7 @@ still says HailDeck internally. Say the word if you want that done too.
 `ASWebAuthenticationSession` sign-in flow, real Keychain token persistence,
 real token refresh. What's **not** real: the `clientID` values and exact
 endpoint URLs in `InsurerProvider.mitchell` / `InsurerProvider.ccc`, since
-those only exist once HailDeck is actually registered with each provider:
+those only exist once DentDOG is actually registered with each provider:
 
 - **Mitchell**: has a public developer portal (developer.mitchell.com) with
   a documented RepairCenter Transactional API and a defined "7 steps to
@@ -67,7 +62,7 @@ those only exist once HailDeck is actually registered with each provider:
   There's no public self-serve signup the way Mitchell has one.
 
 **Also not built yet**: the actual estimate push/pull logic — pulling a claim
-into HailDeck, or pushing a completed estimate back out in whatever format
+into DentDOG, or pushing a completed estimate back out in whatever format
 each provider expects (likely CIECA BMS/XML today, possibly their emerging
 JSON API standards down the road). The OAuth layer is the front door; what
 happens after you're authenticated is provider-specific work that depends on
@@ -168,7 +163,7 @@ yourself, the size measurement itself is real, just the auto-detection of
 A WidgetKit extension — small and medium sizes, one working button today:
 **Start New Estimate**, which deep-links into the app (`dentdog://newEstimate`)
 and resets both decks via `NotificationCenter` (`PanelStackView`'s
-`.onReceive` + `VehicleDeckState.reset()`, wired in `HailDeckApp.swift`'s new
+`.onReceive` + `VehicleDeckState.reset()`, wired in `DentDOGApp.swift`'s new
 `onOpenURL`).
 
 **What's real vs. scaffold, plainly:**
@@ -212,9 +207,9 @@ if you're adding it by hand instead):
 ## Before it builds
 
 **Option A — Xcode, when you have a Mac:**
-1. Create a new Xcode iOS App project named **HailDeck** (SwiftUI, no Core Data), then drop
+1. Create a new Xcode iOS App project named **DentDOG** (SwiftUI, no Core Data), then drop
    all the `.swift` files into it, replacing the default `ContentView.swift`/`App.swift`.
-   Use `HailDeck/Info.plist` as-is or merge its camera key into Xcode's generated one.
+   Use `DentDOG/Info.plist` as-is or merge its camera key into Xcode's generated one.
 2. Minimum deployment target: iOS 16.
 
 **Option B — Codemagic, no Mac needed (see below).**
@@ -228,12 +223,12 @@ generate the `.xcodeproj` and build it entirely in the cloud — you never touch
    ```
    git init
    git add .
-   git commit -m "HailDeck"
+   git commit -m "DentDOG"
    git remote add origin <your-repo-url>
    git push -u origin main
    ```
 2. **Sign up at codemagic.io** (free tier covers this) and connect that repo.
-3. Codemagic detects `codemagic.yaml` and shows the **haildeck-simulator-preview**
+3. Codemagic detects `codemagic.yaml` and shows the **dentdog-simulator-preview**
    workflow. Hit **Start new build**.
 4. The pipeline installs XcodeGen, generates the Xcode project, builds for the iOS
    Simulator, boots it, installs the app, launches it, and takes a screenshot.
@@ -241,8 +236,8 @@ generate the `.xcodeproj` and build it entirely in the cloud — you never touch
    `AVCaptureDevice.default(...)` lookup will return `nil` on the simulator, so
    the capture button won't produce a photo there. You'll need a **real device**
    build (which needs paid signing, see below) to actually test the camera.
-5. Open the **Artifacts** tab — `haildeck_preview.png` is a real screenshot of
-   HailDeck actually running.
+5. Open the **Artifacts** tab — `dentdog_preview.png` is a real screenshot of
+   DentDOG actually running.
 
 Installing on your own iPhone is a separate later step requiring a paid Apple
 Developer account ($99/yr) and signing certs set up in the Codemagic dashboard —

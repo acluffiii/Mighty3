@@ -1,17 +1,17 @@
-name: HailDeck
+name: DentDOG
 options:
   bundleIdPrefix: com.cluffwork
   deploymentTarget:
     iOS: "16.0"
 
 targets:
-  HailDeck:
+  DentDOG:
     type: application
     platform: iOS
     sources:
-      - path: HailDeck
+      - path: DentDOG
     info:
-      path: HailDeck/Info.plist
+      path: DentDOG/Info.plist
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.cluffwork.haildeck

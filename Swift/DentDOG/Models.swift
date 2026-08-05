@@ -3,7 +3,7 @@ import Combine
 
 /// Posted when the "Start New Estimate" widget is tapped and the deep link
 /// (dentdog://newEstimate) is opened. PanelStackView listens for this and
-/// resets both decks — see HailDeckApp.swift's onOpenURL for where it's sent.
+/// resets both decks — see DentDOGApp.swift's onOpenURL for where it's sent.
 extension Notification.Name {
     static let startNewEstimate = Notification.Name("dentdog.startNewEstimate")
 }

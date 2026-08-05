@@ -9,7 +9,7 @@ import SwiftUI
    (last estimate total, today's panel count) needs two things that don't
    exist yet in this Swift project:
 
-   1. Persistence in the main app. Nothing in HailDeck/PanelStackView.swift
+   1. Persistence in the main app. Nothing in DentDOG/PanelStackView.swift
       or Models.swift saves an estimate anywhere right now — closing the
       app loses everything, same gap that's been in this project's known-
       issues list since early in its build. The web build solved this with

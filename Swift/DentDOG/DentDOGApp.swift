@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct HailDeckApp: App {
+struct DentDOGApp: App {
     var body: some Scene {
         WindowGroup {
             PanelStackView()

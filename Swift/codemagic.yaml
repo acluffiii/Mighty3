@@ -1,6 +1,6 @@
 workflows:
-  haildeck-simulator-preview:
-    name: HailDeck — Simulator Build + Screenshot
+  dentdog-simulator-preview:
+    name: DentDOG — Simulator Build + Screenshot
     max_build_duration: 30
     instance_type: mac_mini_m2
     environment:
@@ -20,8 +20,8 @@ workflows:
       - name: Build for iOS Simulator
         script: |
           xcodebuild \
-            -project HailDeck.xcodeproj \
-            -scheme HailDeck \
+            -project DentDOG.xcodeproj \
+            -scheme DentDOG \
             -sdk iphonesimulator \
             -destination "platform=iOS Simulator,name=$SIM_DEVICE" \
             -derivedDataPath build \
@@ -29,22 +29,22 @@ workflows:
 
       - name: Boot simulator, install, launch, screenshot
         script: |
-          APP_PATH=$(find build -name "HailDeck.app" | head -n1)
+          APP_PATH=$(find build -name "DentDOG.app" | head -n1)
           xcrun simctl boot "$SIM_DEVICE" || true
           xcrun simctl bootstatus "$SIM_DEVICE" -b
           xcrun simctl install "$SIM_DEVICE" "$APP_PATH"
           xcrun simctl launch "$SIM_DEVICE" "$BUNDLE_ID"
           sleep 5
-          xcrun simctl io "$SIM_DEVICE" screenshot haildeck_preview.png
+          xcrun simctl io "$SIM_DEVICE" screenshot dentdog_preview.png
 
     artifacts:
       - build/**/*.app
-      - haildeck_preview.png
+      - dentdog_preview.png
 
 # Notes:
 # - This workflow only needs a free Codemagic account — no Apple Developer Program
 #   enrollment, no signing certificates. Simulator builds don't require code signing.
-# - Output: haildeck_preview.png in the build artifacts tab — an actual screenshot
+# - Output: dentdog_preview.png in the build artifacts tab — an actual screenshot
 #   of the running app, viewable from any device.
 # - To install on a physical iPhone instead of just previewing, you'll need an
 #   Apple Developer account ($99/yr) and to add code signing in the Codemagic
