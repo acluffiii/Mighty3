@@ -15,10 +15,12 @@ workflows:
 
       - name: Generate Xcode project from project.yml
         script: |
+          cd Swift
           xcodegen generate
 
       - name: Build for iOS Simulator
         script: |
+          cd Swift
           xcodebuild \
             -project DentDOG.xcodeproj \
             -scheme DentDOG \
@@ -29,6 +31,7 @@ workflows:
 
       - name: Boot simulator, install, launch, screenshot
         script: |
+          cd Swift
           APP_PATH=$(find build -name "DentDOG.app" | head -n1)
           xcrun simctl boot "$SIM_DEVICE" || true
           xcrun simctl bootstatus "$SIM_DEVICE" -b
@@ -38,8 +41,8 @@ workflows:
           xcrun simctl io "$SIM_DEVICE" screenshot dentdog_preview.png
 
     artifacts:
-      - build/**/*.app
-      - dentdog_preview.png
+      - Swift/build/**/*.app
+      - Swift/dentdog_preview.png
 
 # Notes:
 # - This workflow only needs a free Codemagic account — no Apple Developer Program
