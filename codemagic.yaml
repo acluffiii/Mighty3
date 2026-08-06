@@ -38,9 +38,11 @@ workflows:
           APP_PATH=$(find build -name "DentDOG.app" | head -n1)
           xcrun simctl boot "$SIM_NAME" || true
           xcrun simctl bootstatus "$SIM_NAME" -b
+          open -a Simulator
+          sleep 5
           xcrun simctl install "$SIM_NAME" "$APP_PATH"
           xcrun simctl launch "$SIM_NAME" "$BUNDLE_ID"
-          sleep 5
+          sleep 15
           xcrun simctl io "$SIM_NAME" screenshot "$HOME/dentdog_preview.png"
           cp "$HOME/dentdog_preview.png" dentdog_preview.png
 
