@@ -15,6 +15,7 @@
 import SwiftUI
 import ARKit
 
+#if !targetEnvironment(simulator)
 struct ARCameraView: UIViewRepresentable {
     let session: ARSession
 
@@ -27,6 +28,7 @@ struct ARCameraView: UIViewRepresentable {
     }
     func updateUIView(_ uiView: ARSCNView, context: Context) {}
 }
+#endif
 
 struct LidarMeasureView: View {
     let panelName: String
@@ -50,8 +52,12 @@ struct LidarMeasureView: View {
         ZStack {
             Color.black.ignoresSafeArea()
 
+            #if targetEnvironment(simulator)
+            Color(hex: "14171A").ignoresSafeArea()
+            #else
             ARCameraView(session: lidarManager.session(shared: true))
                 .ignoresSafeArea()
+            #endif
 
             GeometryReader { geo in
                 overlayLayer(in: geo.size)
@@ -199,12 +205,16 @@ struct LidarMeasureView: View {
 
     private func doCapture() {
         let measurement = tracking.capture()
+        #if targetEnvironment(simulator)
+        let snapshot: UIImage? = nil
+        #else
         let snapshot = lidarManager.session(shared: true).currentFrame.flatMap { arFrame -> UIImage? in
             let ciImage = CIImage(cvPixelBuffer: arFrame.capturedImage)
             let context = CIContext()
             guard let cgImage = context.createCGImage(ciImage, from: ciImage.extent) else { return nil }
             return UIImage(cgImage: cgImage)
         }
+        #endif
         tracking.stop()
         onMeasured(snapshot, measurement)
         dismiss()

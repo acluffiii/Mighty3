@@ -19,7 +19,6 @@ targets:
         CURRENT_PROJECT_VERSION: "1"
         TARGETED_DEVICE_FAMILY: "1"
         SWIFT_VERSION: "5.0"
-        INFOPLIST_KEY_UILaunchScreen_Generation: "YES"
         GENERATE_INFOPLIST_FILE: "NO"
     dependencies:
       - target: DentDOGWidgetExtension
