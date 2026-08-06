@@ -236,7 +236,7 @@ struct PanelStackView: View {
                 .zIndex(Double(100 - pos))
                 .allowsHitTesting(pos <= maxVisibleDepth)
                 .onTapGesture { if !front { bringToFront(panelIndex) } }
-                .gesture(front ? frontCardGesture(panelIndex) : nil)
+                .ifFront(front) { $0.gesture(frontCardGesture(panelIndex)) }
                 .animation(.spring(response: 0.4, dampingFraction: 0.85), value: order)
             }
         }
@@ -377,4 +377,11 @@ struct PanelStackView: View {
 
 #Preview {
     PanelStackView()
+}
+
+private extension View {
+    @ViewBuilder
+    func ifFront<T: View>(_ condition: Bool, transform: (Self) -> T) -> some View {
+        if condition { transform(self) } else { self }
+    }
 }

@@ -32,10 +32,10 @@ struct PhotoImporter: UIViewControllerRepresentable {
                 parent.dismiss()
                 return
             }
-            provider.loadObject(ofClass: UIImage.self) { [weak parent] image, _ in
+            provider.loadObject(ofClass: UIImage.self) { image, _ in
                 DispatchQueue.main.async {
-                    if let image = image as? UIImage { parent?.onImport(image) }
-                    parent?.dismiss()
+                    if let image = image as? UIImage { parent.onImport(image) }
+                    parent.dismiss()
                 }
             }
         }
