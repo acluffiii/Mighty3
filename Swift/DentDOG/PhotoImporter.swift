@@ -8,7 +8,6 @@ import PhotosUI
 /// out-of-process and only hands back the one photo the user picked.
 struct PhotoImporter: UIViewControllerRepresentable {
     var onImport: (UIImage) -> Void
-    @Environment(\.dismiss) private var dismiss
 
     func makeUIViewController(context: Context) -> PHPickerViewController {
         var config = PHPickerConfiguration()
@@ -28,14 +27,12 @@ struct PhotoImporter: UIViewControllerRepresentable {
         init(_ parent: PhotoImporter) { self.parent = parent }
 
         func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
-            guard let provider = results.first?.itemProvider, provider.canLoadObject(ofClass: UIImage.self) else {
-                parent.dismiss()
-                return
-            }
-            provider.loadObject(ofClass: UIImage.self) { image, _ in
+            picker.dismiss(animated: true)
+            guard let provider = results.first?.itemProvider,
+                  provider.canLoadObject(ofClass: UIImage.self) else { return }
+            provider.loadObject(ofClass: UIImage.self) { [weak self] image, _ in
                 DispatchQueue.main.async {
-                    if let image = image as? UIImage { parent.onImport(image) }
-                    parent.dismiss()
+                    if let image = image as? UIImage { self?.parent.onImport(image) }
                 }
             }
         }
