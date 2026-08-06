@@ -6,7 +6,6 @@ workflows:
     environment:
       xcode: latest
       vars:
-        SIM_DEVICE: "iPhone 15"
         BUNDLE_ID: "com.cluffwork.haildeck"
     scripts:
       - name: Install XcodeGen
@@ -21,24 +20,28 @@ workflows:
       - name: Build for iOS Simulator
         script: |
           cd Swift
+          # Pick whatever iPhone simulator is available on this machine
+          SIM_NAME=$(xcrun simctl list devices available | awk -F'[()]' '/iPhone/{print $1}' | tail -1 | xargs)
+          echo "Building for: $SIM_NAME"
           xcodebuild \
             -project DentDOG.xcodeproj \
             -scheme DentDOG \
             -sdk iphonesimulator \
-            -destination "platform=iOS Simulator,name=$SIM_DEVICE" \
+            -destination "platform=iOS Simulator,name=$SIM_NAME" \
             -derivedDataPath build \
             build
 
       - name: Boot simulator, install, launch, screenshot
         script: |
           cd Swift
+          SIM_NAME=$(xcrun simctl list devices available | awk -F'[()]' '/iPhone/{print $1}' | tail -1 | xargs)
           APP_PATH=$(find build -name "DentDOG.app" | head -n1)
-          xcrun simctl boot "$SIM_DEVICE" || true
-          xcrun simctl bootstatus "$SIM_DEVICE" -b
-          xcrun simctl install "$SIM_DEVICE" "$APP_PATH"
-          xcrun simctl launch "$SIM_DEVICE" "$BUNDLE_ID"
+          xcrun simctl boot "$SIM_NAME" || true
+          xcrun simctl bootstatus "$SIM_NAME" -b
+          xcrun simctl install "$SIM_NAME" "$APP_PATH"
+          xcrun simctl launch "$SIM_NAME" "$BUNDLE_ID"
           sleep 5
-          xcrun simctl io "$SIM_DEVICE" screenshot dentdog_preview.png
+          xcrun simctl io "$SIM_NAME" screenshot dentdog_preview.png
 
     artifacts:
       - Swift/build/**/*.app
