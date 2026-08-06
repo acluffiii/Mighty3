@@ -41,7 +41,8 @@ workflows:
           xcrun simctl install "$SIM_NAME" "$APP_PATH"
           xcrun simctl launch "$SIM_NAME" "$BUNDLE_ID"
           sleep 5
-          xcrun simctl io "$SIM_NAME" screenshot dentdog_preview.png
+          xcrun simctl io "$SIM_NAME" screenshot "$HOME/dentdog_preview.png"
+          cp "$HOME/dentdog_preview.png" dentdog_preview.png
 
     artifacts:
       - Swift/build/**/*.app
