@@ -50,8 +50,10 @@ struct MeasureOverlayState {
 // MARK: - Exponential moving average smoothing
 
 private struct EMASmoother {
-    var alpha: CGFloat = 0.3
+    var alpha: CGFloat
     private var smoothed: CGRect?
+
+    init(alpha: CGFloat = 0.3) { self.alpha = alpha }
 
     mutating func update(with newRect: CGRect?) -> CGRect? {
         guard let newRect = newRect else {
