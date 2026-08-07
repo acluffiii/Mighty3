@@ -35,20 +35,38 @@ workflows:
         script: |
           cd Swift
           SIM_NAME=$(xcrun simctl list devices available | awk -F'[()]' '/iPhone/{print $1}' | tail -1 | xargs)
+          SIM_UDID=$(xcrun simctl list devices available | grep "$SIM_NAME" | grep -oE '[A-F0-9-]{36}' | head -1)
+          echo "Simulator: $SIM_NAME ($SIM_UDID)"
           APP_PATH=$(find build -name "DentDOG.app" | head -n1)
-          xcrun simctl boot "$SIM_NAME" || true
-          xcrun simctl bootstatus "$SIM_NAME" -b
+          echo "App path: $APP_PATH"
+
+          xcrun simctl boot "$SIM_UDID" || true
+          xcrun simctl bootstatus "$SIM_UDID" -b
           open -a Simulator
           sleep 5
-          xcrun simctl install "$SIM_NAME" "$APP_PATH"
-          xcrun simctl launch "$SIM_NAME" "$BUNDLE_ID"
-          sleep 15
-          xcrun simctl io "$SIM_NAME" screenshot "$HOME/dentdog_preview.png"
+
+          xcrun simctl install "$SIM_UDID" "$APP_PATH"
+
+          # Launch with console output captured so crashes are visible in the log
+          xcrun simctl launch --console-pty "$SIM_UDID" "$BUNDLE_ID" &
+          LAUNCH_PID=$!
+          sleep 25
+
+          # Check if the app process is still running (not crashed)
+          RUNNING=$(xcrun simctl spawn "$SIM_UDID" launchctl list 2>/dev/null | grep "$BUNDLE_ID" || echo "NOT RUNNING")
+          echo "App status after 25s: $RUNNING"
+
+          # Collect any crash logs
+          CRASH_DIR="$HOME/Library/Logs/DiagnosticReports"
+          ls "$CRASH_DIR"/*.crash 2>/dev/null && cp "$CRASH_DIR"/*.crash . || echo "No crash logs"
+
+          xcrun simctl io "$SIM_UDID" screenshot "$HOME/dentdog_preview.png"
           cp "$HOME/dentdog_preview.png" dentdog_preview.png
 
     artifacts:
       - Swift/build/**/*.app
       - Swift/dentdog_preview.png
+      - Swift/*.crash
 
 # Notes:
 # - This workflow only needs a free Codemagic account — no Apple Developer Program
