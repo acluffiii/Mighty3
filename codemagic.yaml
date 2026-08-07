@@ -28,6 +28,7 @@ workflows:
             -scheme DentDOG \
             -sdk iphonesimulator \
             -destination "platform=iOS Simulator,name=$SIM_NAME" \
+            -configuration Release \
             -derivedDataPath build \
             build
 
