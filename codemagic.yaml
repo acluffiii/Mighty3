@@ -66,10 +66,43 @@ workflows:
           xcrun simctl io "$SIM_UDID" screenshot "$HOME/dentdog_preview.png"
           cp "$HOME/dentdog_preview.png" dentdog_preview.png
 
+      - name: Upload to Appetize for interactive demo
+        script: |
+          cd Swift
+          APP_PATH=$(find build -name "DentDOG.app" | head -n1)
+
+          # Zip the .app for upload (already stripped PlugIns above)
+          zip -r "$HOME/DentDOG_sim.zip" "$APP_PATH"
+
+          if [ -z "$APPETIZE_API_TOKEN" ]; then
+            echo "No APPETIZE_API_TOKEN set — skipping upload"
+            exit 0
+          fi
+
+          RESPONSE=$(curl -s \
+            -F "file=@$HOME/DentDOG_sim.zip" \
+            -F "platform=ios" \
+            -F "note=DentDOG build $BUILD_NUMBER" \
+            "https://api.appetize.io/v1/apps" \
+            -u "$APPETIZE_API_TOKEN:")
+
+          DEMO_URL=$(echo "$RESPONSE" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('publicURL',''))" 2>/dev/null || echo "")
+
+          if [ -n "$DEMO_URL" ]; then
+            echo "============================================"
+            echo "  DEMO LINK: $DEMO_URL"
+            echo "============================================"
+            echo "$DEMO_URL" > appetize_url.txt
+          else
+            echo "Upload response: $RESPONSE"
+            echo "Could not parse demo URL — check API token"
+          fi
+
     artifacts:
       - Swift/build/**/*.app
       - Swift/dentdog_preview.png
       - Swift/*.crash
+      - Swift/appetize_url.txt
 
 # Notes:
 # - This workflow only needs a free Codemagic account — no Apple Developer Program
