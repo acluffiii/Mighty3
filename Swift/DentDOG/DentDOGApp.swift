@@ -2,11 +2,15 @@ import SwiftUI
 
 @main
 struct DentDOGApp: App {
+    init() {
+        print("[DentDOG] ✓ App init")
+    }
     var body: some Scene {
         WindowGroup {
             PanelStackView()
                 .preferredColorScheme(.dark)
                 .statusBarHidden(false)
+                .onAppear { print("[DentDOG] ✓ PanelStackView appeared") }
                 .onOpenURL { url in
                     // dentdog://newEstimate — sent by the DentDOG widget's
                     // "Start New Estimate" button. OAuth callbacks
