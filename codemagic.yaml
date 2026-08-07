@@ -45,6 +45,9 @@ workflows:
           open -a Simulator
           sleep 5
 
+          # iOS 26 Simulator rejects widget .appex placeholder creation — strip it
+          # before install. The screenshot only needs the main app.
+          rm -rf "$APP_PATH/PlugIns/"
           xcrun simctl install "$SIM_UDID" "$APP_PATH"
 
           # Launch with console output captured so crashes are visible in the log
