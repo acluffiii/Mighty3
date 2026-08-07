@@ -29,6 +29,7 @@ workflows:
             -sdk iphonesimulator \
             -destination "platform=iOS Simulator,name=$SIM_NAME" \
             -configuration Release \
+            ONLY_ACTIVE_ARCH=NO \
             -derivedDataPath build \
             build
 
@@ -71,9 +72,16 @@ workflows:
         script: |
           cd Swift
           APP_PATH=$(find build -name "DentDOG.app" | head -n1)
+          echo "Uploading: $APP_PATH"
 
-          # Zip the .app for upload (already stripped PlugIns above)
-          zip -r "$HOME/DentDOG_sim.zip" "$APP_PATH"
+          # Zip with .app at the root (Appetize requires this structure)
+          APP_DIR=$(dirname "$APP_PATH")
+          APP_NAME=$(basename "$APP_PATH")
+          cd "$APP_DIR"
+          zip -r "$HOME/DentDOG_sim.zip" "$APP_NAME"
+          echo "Zip contents:"
+          unzip -l "$HOME/DentDOG_sim.zip" | head -10
+          cd -
 
           if [ -z "$APPETIZE_API_TOKEN" ]; then
             echo "No APPETIZE_API_TOKEN set — skipping upload"
