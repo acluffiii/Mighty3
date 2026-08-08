@@ -92,22 +92,28 @@ struct PanelCardView: View {
         }
     }
 
-    /// LiDAR/marker measurement entry point — sits right under the manual
-    /// size chips so it reads as "or measure it instead" rather than a
-    /// separate unrelated feature.
+    /// Measurement entry point — routes to LiDAR on Pro devices, photo analysis
+    /// (DoG / line board) on non-LiDAR iPhones. Sits right under the manual
+    /// size chips so it reads as "or measure it instead."
     private var measureRow: some View {
         VStack(alignment: .leading, spacing: 6) {
             Button(action: onRequestMeasure) {
                 HStack(spacing: 7) {
                     Image(systemName: "arrow.up.left.and.down.right.magnifyingglass")
                         .font(.system(size: 12, weight: .semibold))
-                    Text("Measure with LiDAR")
+                    Text("Measure dent")
                         .font(.system(size: 12.5, weight: .bold))
                     Spacer()
-                    if let m = state.lastMeasurement, m.widthMM != nil {
-                        Text(m.formatted())
-                            .font(.system(size: 10.5, design: .monospaced))
-                            .foregroundStyle(Color(hex: "39D97A"))
+                    if let m = state.lastMeasurement {
+                        if m.widthMM != nil {
+                            Text(m.formatted())
+                                .font(.system(size: 10.5, design: .monospaced))
+                                .foregroundStyle(Color(hex: "39D97A"))
+                        } else if m.measurementMethod != .unmeasured {
+                            Text(m.measurementMethod.rawValue)
+                                .font(.system(size: 10, design: .monospaced))
+                                .foregroundStyle(Color(hex: "FF6A1A").opacity(0.8))
+                        }
                     }
                 }
                 .foregroundStyle(.white)

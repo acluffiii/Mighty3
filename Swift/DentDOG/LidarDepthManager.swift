@@ -26,6 +26,12 @@ struct DepthCorrectedFrame {
 
 final class LidarDepthManager: NSObject, ObservableObject {
 
+    /// Static check so call sites (e.g. PanelStackView) can route without
+    /// instantiating a full LidarDepthManager or importing ARKit themselves.
+    static var isLidarCapable: Bool {
+        ARWorldTrackingConfiguration.supportsFrameSemantics(.sceneDepth)
+    }
+
     @Published private(set) var isLidarAvailable: Bool = false
     @Published private(set) var latestFrame: DepthCorrectedFrame?
     @Published private(set) var statusMessage: String = "Not started"

@@ -15,6 +15,7 @@ struct PanelStackView: View {
     @State private var captureIndex: Int? = nil
     @State private var showCamera = false
     @State private var showLidarMeasure = false
+    @State private var showPhotoMeasure = false
     @State private var showMap = false
     @State private var shareURL: URL? = nil
     @State private var showShareSheet = false
@@ -101,6 +102,24 @@ struct PanelStackView: View {
         .fullScreenCover(isPresented: $showLidarMeasure) {
             if let i = captureIndex {
                 LidarMeasureView(panelName: panels[i].spec.name) { image, measurement in
+                    let panel = panels[i]
+                    panel.lastMeasurement = measurement
+                    if let suggested = measurement.suggestedSize {
+                        panel.size = suggested
+                    }
+                    if let image {
+                        panel.photo = image
+                    }
+                    if panel.isComplete && !panel.justCompleted {
+                        panel.justCompleted = true
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { panel.justCompleted = false }
+                    }
+                }
+            }
+        }
+        .fullScreenCover(isPresented: $showPhotoMeasure) {
+            if let i = captureIndex {
+                PhotoMeasureView(panelName: panels[i].spec.name) { image, measurement in
                     let panel = panels[i]
                     panel.lastMeasurement = measurement
                     if let suggested = measurement.suggestedSize {
@@ -350,7 +369,11 @@ struct PanelStackView: View {
 
     private func requestMeasure(_ index: Int) {
         captureIndex = index
-        showLidarMeasure = true
+        if LidarDepthManager.isLidarCapable {
+            showLidarMeasure = true
+        } else {
+            showPhotoMeasure = true
+        }
     }
 
     private func advance(_ dir: Int) {

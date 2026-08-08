@@ -51,6 +51,8 @@ struct DentMeasurement {
     enum MeasurementMethod: String {
         case lidar = "LiDAR"
         case referenceMarker = "Marker scale"
+        case photoDoG = "Photo (DoG)"
+        case photoLineBoard = "Photo (Lines)"
         case unmeasured = "Unmeasured"
     }
 
