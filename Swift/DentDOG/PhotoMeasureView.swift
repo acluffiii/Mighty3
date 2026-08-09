@@ -29,7 +29,7 @@ struct PhotoMeasureView: View {
     @State private var capturedImage: UIImage?
     @State private var result: DentDoGAnalyzer.AnalysisResult?
 
-    private enum CaptureMode {
+    private enum CaptureMode: Equatable {
         case doG, lineBoard, dualLineBoard
         var isDual: Bool { self == .dualLineBoard }
     }
@@ -56,7 +56,7 @@ struct PhotoMeasureView: View {
             camera.stop()
             dualCamera.stop()
         }
-        .onChange(of: captureMode) { _, newMode in
+        .onChange(of: captureMode) { newMode in
             if newMode.isDual {
                 camera.stop()
                 if dualConfigured {
