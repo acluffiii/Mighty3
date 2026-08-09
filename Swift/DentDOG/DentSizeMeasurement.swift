@@ -53,6 +53,7 @@ struct DentMeasurement {
         case referenceMarker = "Marker scale"
         case photoDoG = "Photo (DoG)"
         case photoLineBoard = "Photo (Lines)"
+        case dualCameraLineBoard = "Dual Camera (Lines)"
         case unmeasured = "Unmeasured"
     }
 

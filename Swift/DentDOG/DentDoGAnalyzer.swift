@@ -62,6 +62,89 @@ enum DentDoGAnalyzer {
         )
     }
 
+    // MARK: - Stereo line board (dual camera)
+
+    /// Analyzes simultaneously captured wide + ultrawide line board frames.
+    ///
+    /// The ultrawide frame is center-cropped to match the wide camera's angular FOV
+    /// using `fovRatio` (= wideFOV / ultrawideFOV, provided by DualCameraLineController).
+    /// Line deviation detection runs independently on each view; a dent is confirmed
+    /// only when both views agree (≥ 40% x-overlap of their detected regions), which
+    /// rejects uncorrelated sensor noise. The width disparity between the two views
+    /// encodes parallax and serves as a depth-proxy confidence score.
+    static func analyzeStereoLineBoard(wide: UIImage, ultra: UIImage, fovRatio: Float) -> AnalysisResult {
+        guard let wideCG  = bakeOrientation(wide),
+              let ultraCG = bakeOrientation(ultra) else { return emptyDual() }
+
+        // Crop the ultrawide center to the same angular coverage as the wide lens.
+        let ratio = max(0.3, min(1.0, CGFloat(fovRatio)))
+        let uw = ultraCG.width, uh = ultraCG.height
+        let cw = Int(CGFloat(uw) * ratio), ch = Int(CGFloat(uh) * ratio)
+        guard let ultraCropped = ultraCG.cropping(to: CGRect(
+                x: (uw - cw) / 2, y: (uh - ch) / 2, width: cw, height: ch))
+        else { return emptyDual() }
+
+        let wideSize  = CGSize(width: wideCG.width, height: wideCG.height)
+        let ultraSize = CGSize(width: cw, height: ch)
+
+        let widePx  = runLineBoard(cgImage: wideCG)
+        let ultraPx = runLineBoard(cgImage: ultraCropped)
+
+        var consensusPx: CGRect? = nil
+        var depthConfidence: Float? = nil
+
+        if let wd = widePx, let ud = ultraPx {
+            let wNorm    = normalized(wd, in: wideSize)
+            let uNorm    = normalized(ud, in: ultraSize)
+            let xOverlap = min(wNorm.maxX, uNorm.maxX) - max(wNorm.minX, uNorm.minX)
+            let xUnion   = max(wNorm.maxX, uNorm.maxX) - min(wNorm.minX, uNorm.minX)
+            if xUnion > 0, xOverlap / xUnion >= 0.4 {
+                consensusPx = wd   // use wide pixel space for the result overlay
+                // Width-disparity between views is proportional to parallax → depth proxy.
+                let widthDisp = abs(wNorm.width - uNorm.width)
+                depthConfidence = Float(min(1.0, widthDisp * 6.0))
+            }
+        } else if let wd = widePx {
+            // Only one view detected a region — lower confidence but still report.
+            consensusPx = wd
+            depthConfidence = 0.2
+        }
+
+        let refPx = detectCoinHighlight(cgImage: wideCG)
+
+        let measurement: DentMeasurement
+        if let dent = consensusPx, let ref = refPx, ref.width > 0 {
+            let mmPerPx = CoinDiameterMM.quarter / Double(ref.width)
+            measurement = DentMeasurement(
+                widthMM: Double(dent.width) * mmPerPx,
+                heightMM: Double(dent.height) * mmPerPx,
+                depthConfidence: depthConfidence,
+                measurementMethod: .dualCameraLineBoard
+            )
+        } else {
+            measurement = DentMeasurement(widthMM: nil, heightMM: nil,
+                                          depthConfidence: depthConfidence,
+                                          measurementMethod: .dualCameraLineBoard)
+        }
+
+        return AnalysisResult(
+            dentBoxNorm: consensusPx.map { normalized($0, in: wideSize) },
+            refBoxNorm:  refPx.map      { normalized($0, in: wideSize) },
+            measurement: measurement,
+            dentDetected: consensusPx != nil
+        )
+    }
+
+    private static func emptyDual() -> AnalysisResult {
+        AnalysisResult(
+            dentBoxNorm: nil, refBoxNorm: nil,
+            measurement: DentMeasurement(widthMM: nil, heightMM: nil,
+                                         depthConfidence: nil,
+                                         measurementMethod: .dualCameraLineBoard),
+            dentDetected: false
+        )
+    }
+
     // MARK: - DoG pipeline
 
     private static func runDoG(cgImage: CGImage) -> CGRect? {

@@ -2,16 +2,15 @@
 //  PhotoMeasureView.swift
 //  DentDOG 2.0
 //
-//  Full-screen dent measurement for non-LiDAR iPhones. The tech points
-//  the camera at the panel, picks a mode, and captures:
+//  Full-screen dent measurement for non-LiDAR iPhones. Three capture modes:
 //
-//    • DoG mode  — aim at the dent directly; works on gloss/texture variation.
-//    • Line mode — aim at the PDR board's reflection; stripe distortion maps the dent.
+//    • DoG       — single camera, direct panel photo; blob detection.
+//    • Line      — single camera, PDR board reflection; stripe distortion.
+//    • Dual Cam  — simultaneous wide + ultrawide (A12+ only); stereo line board.
+//                  Consensus detection filters noise; disparity encodes depth.
 //
-//  After capture, DentDoGAnalyzer runs on a background thread. The review
-//  screen shows the frozen photo with a green dent box and orange reference
-//  circle (if a coin is detected). "Use measurement" forwards the result to
-//  the panel card, which applies the suggested size chip and stores the photo.
+//  After capture, analysis runs on a background thread. The review screen
+//  overlays a green dent box and orange reference coin circle (if detected).
 //
 
 import SwiftUI
@@ -22,10 +21,18 @@ struct PhotoMeasureView: View {
     var onMeasured: (UIImage?, DentMeasurement) -> Void
 
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var camera = CameraSessionController()
-    @State private var mode: DentDoGAnalyzer.MeasureMode = .doG
+    @StateObject private var camera     = CameraSessionController()
+    @StateObject private var dualCamera = DualCameraLineController()
+
+    @State private var captureMode: CaptureMode = .doG
+    @State private var dualConfigured   = false
     @State private var capturedImage: UIImage?
     @State private var result: DentDoGAnalyzer.AnalysisResult?
+
+    private enum CaptureMode {
+        case doG, lineBoard, dualLineBoard
+        var isDual: Bool { self == .dualLineBoard }
+    }
 
     var body: some View {
         ZStack {
@@ -41,8 +48,28 @@ struct PhotoMeasureView: View {
                 captureScreen
             }
         }
-        .onAppear  { camera.configure(); camera.start() }
-        .onDisappear { camera.stop() }
+        .onAppear {
+            camera.configure()
+            camera.start()
+        }
+        .onDisappear {
+            camera.stop()
+            dualCamera.stop()
+        }
+        .onChange(of: captureMode) { _, newMode in
+            if newMode.isDual {
+                camera.stop()
+                if dualConfigured {
+                    dualCamera.start()
+                } else {
+                    dualCamera.configure()
+                    dualConfigured = true
+                }
+            } else {
+                dualCamera.stop()
+                camera.start()
+            }
+        }
     }
 
     // MARK: - Capture screen
@@ -69,17 +96,38 @@ struct PhotoMeasureView: View {
 
     private var cameraPreview: some View {
         Group {
-            if camera.isConfigured {
-                CameraPreviewLayer(session: camera.session)
+            if captureMode.isDual {
+                if dualCamera.isReady {
+                    CameraPreviewLayer(session: dualCamera.session)
+                } else {
+                    previewPlaceholder
+                }
             } else {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.06))
-                    ProgressView().tint(.white)
+                if camera.isConfigured {
+                    CameraPreviewLayer(session: camera.session)
+                } else {
+                    previewPlaceholder
                 }
             }
         }
         .aspectRatio(3/4, contentMode: .fit)
         .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+
+    private var previewPlaceholder: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.06))
+            VStack(spacing: 10) {
+                ProgressView().tint(.white)
+                if captureMode.isDual, !DualCameraLineController.isSupported {
+                    Text("Multi-cam not supported on this device")
+                        .font(.system(size: 11, design: .monospaced))
+                        .foregroundStyle(Color(hex: "FF6A1A"))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 12)
+                }
+            }
+        }
     }
 
     // MARK: - Review screen
@@ -152,8 +200,11 @@ struct PhotoMeasureView: View {
 
     private var modeToggle: some View {
         HStack(spacing: 0) {
-            modeChip("DoG detect", sel: mode == .doG) { mode = .doG }
-            modeChip("Line board", sel: mode == .lineBoard) { mode = .lineBoard }
+            modeChip("DoG detect", sel: captureMode == .doG) { captureMode = .doG }
+            modeChip("Line board", sel: captureMode == .lineBoard) { captureMode = .lineBoard }
+            if DualCameraLineController.isSupported {
+                modeChip("Dual Cam", sel: captureMode == .dualLineBoard) { captureMode = .dualLineBoard }
+            }
         }
         .background(Color.white.opacity(0.07), in: RoundedRectangle(cornerRadius: 10))
         .overlay(RoundedRectangle(cornerRadius: 10).stroke(.white.opacity(0.12)))
@@ -174,9 +225,15 @@ struct PhotoMeasureView: View {
     }
 
     private var instructionCard: some View {
-        let text = mode == .doG
-            ? "Center the dent in frame. Place a quarter near it for auto-scale."
-            : "Aim at the PDR board reflection on the panel — distorted stripes show the dent."
+        let text: String
+        switch captureMode {
+        case .doG:
+            text = "Center the dent in frame. Place a quarter near it for auto-scale."
+        case .lineBoard:
+            text = "Aim at the PDR board reflection on the panel — distorted stripes show the dent."
+        case .dualLineBoard:
+            text = "Aim both cameras at the line board reflection. Wide + ultrawide stereo confirms the dent and estimates depth."
+        }
         return Text(text)
             .font(.system(size: 11.5, weight: .medium, design: .monospaced))
             .foregroundStyle(.white.opacity(0.75))
@@ -186,17 +243,18 @@ struct PhotoMeasureView: View {
     }
 
     private var captureButton: some View {
-        Button(action: shootAndAnalyze) {
+        let ready = captureMode.isDual ? dualCamera.isReady : camera.isConfigured
+        return Button(action: shootAndAnalyze) {
             Text("Capture & Analyze")
                 .font(.system(size: 15, weight: .bold))
                 .foregroundStyle(.black)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
-                .background(camera.isConfigured ? Color(hex: "FF6A1A") : Color.gray,
+                .background(ready ? Color(hex: "FF6A1A") : Color.gray,
                              in: RoundedRectangle(cornerRadius: 14))
         }
         .buttonStyle(.plain)
-        .disabled(!camera.isConfigured)
+        .disabled(!ready)
         .padding(.horizontal)
     }
 
@@ -267,6 +325,17 @@ struct PhotoMeasureView: View {
                 }
             }
 
+            if let conf = m.depthConfidence {
+                HStack(spacing: 6) {
+                    Text("Depth confidence:")
+                        .foregroundStyle(.white.opacity(0.6))
+                    Text(String(format: "%.0f%%", conf * 100))
+                        .foregroundStyle(conf > 0.5 ? Color(hex: "39D97A") : Color(hex: "FF6A1A"))
+                        .fontWeight(.bold)
+                }
+                .font(.system(size: 12, design: .monospaced))
+            }
+
             if let suggested = m.suggestedSize {
                 HStack(spacing: 6) {
                     Text("Suggested size:")
@@ -315,13 +384,24 @@ struct PhotoMeasureView: View {
     // MARK: - Actions
 
     private func shootAndAnalyze() {
-        let currentMode = mode
-        camera.capturePhoto { image in
-            guard let image else { return }
-            self.capturedImage = image   // already on main thread
-            DispatchQueue.global(qos: .userInitiated).async {
-                let r = DentDoGAnalyzer.analyze(image: image, mode: currentMode)
-                DispatchQueue.main.async { self.result = r }
+        if captureMode.isDual {
+            dualCamera.capture { wideImg, ultraImg, fovRatio in
+                self.capturedImage = wideImg
+                DispatchQueue.global(qos: .userInitiated).async {
+                    let r = DentDoGAnalyzer.analyzeStereoLineBoard(
+                        wide: wideImg, ultra: ultraImg, fovRatio: fovRatio)
+                    DispatchQueue.main.async { self.result = r }
+                }
+            }
+        } else {
+            let analyzerMode: DentDoGAnalyzer.MeasureMode = captureMode == .doG ? .doG : .lineBoard
+            camera.capturePhoto { image in
+                guard let image else { return }
+                self.capturedImage = image
+                DispatchQueue.global(qos: .userInitiated).async {
+                    let r = DentDoGAnalyzer.analyze(image: image, mode: analyzerMode)
+                    DispatchQueue.main.async { self.result = r }
+                }
             }
         }
     }
@@ -329,13 +409,15 @@ struct PhotoMeasureView: View {
     private func retake() {
         capturedImage = nil
         result = nil
-        camera.start()
+        if captureMode.isDual {
+            dualCamera.start()
+        } else {
+            camera.start()
+        }
     }
 
     // MARK: - Coordinate helpers
 
-    /// Computes the sub-rect where the image actually renders inside the GeometryReader,
-    /// accounting for scaledToFit letterboxing.
     private func imageDisplayRect(imageSize: CGSize, viewSize: CGSize) -> CGRect {
         let ia = imageSize.width / imageSize.height
         let va = viewSize.width / viewSize.height
