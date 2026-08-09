@@ -14,7 +14,7 @@ struct PanelCardView: View {
     var body: some View {
         ZStack(alignment: .top) {
             RoundedRectangle(cornerRadius: corner, style: .continuous)
-                .fill(.ultraThinMaterial)
+                .fill(Color(hex: "1C232A"))
 
             // translucent photo thumbnail, sits behind the fields
             if let photo = state.photo {

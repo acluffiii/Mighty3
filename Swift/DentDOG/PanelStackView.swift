@@ -71,11 +71,7 @@ struct PanelStackView: View {
             hint
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(
-            RadialGradient(colors: [Color(hex: "232A30"), Color(hex: "14171A")],
-                            center: UnitPoint(x: 0.5, y: -0.1), startRadius: 20, endRadius: 500)
-                .ignoresSafeArea()
-        )
+        .background(Color(hex: "14171A").ignoresSafeArea())
         .overlay(alignment: .topLeading) {
             toolButton(system: "square.grid.2x2") { showMap = true }
                 .padding(14)
