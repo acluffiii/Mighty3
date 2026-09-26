@@ -1,0 +1,41 @@
+{
+  "paintball_68": {
+    "name": "Paintball .68 cal, 285 fps",
+    "mass_g": 3.1,
+    "diameter_mm": 17.3,
+    "muzzle_velocity_fps": 285,
+    "sight_height_mm": 60,
+    "zero_m": 20,
+    "hop": 0.0
+  },
+  "paintball_flatline": {
+    "name": "Paintball .68 cal, flatline barrel (backspin), 285 fps",
+    "mass_g": 3.1,
+    "diameter_mm": 17.3,
+    "muzzle_velocity_fps": 285,
+    "sight_height_mm": 60,
+    "zero_m": 25,
+    "hop": 0.6,
+    "spin_decay_s": 1.5
+  },
+  "airsoft_020": {
+    "name": "Airsoft 0.20 g BB, 350 fps",
+    "mass_g": 0.20,
+    "diameter_mm": 5.95,
+    "muzzle_velocity_fps": 350,
+    "sight_height_mm": 60,
+    "zero_m": 30,
+    "hop": 1.0,
+    "spin_decay_s": 2.0
+  },
+  "airsoft_028": {
+    "name": "Airsoft 0.28 g BB, 296 fps (same gun as 350 fps on 0.20 g)",
+    "mass_g": 0.28,
+    "diameter_mm": 5.95,
+    "muzzle_velocity_fps": 296,
+    "sight_height_mm": 60,
+    "zero_m": 30,
+    "hop": 1.0,
+    "spin_decay_s": 2.0
+  }
+}
