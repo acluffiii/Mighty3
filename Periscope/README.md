@@ -43,6 +43,35 @@ The output columns are:
 At close range the hold is negative (aim low) because the camera sits above the
 barrel. `sight_height_mm` accounts for this.
 
+## Impact dot on the display
+
+`reticle.py` turns a solution into a screen position:
+
+- The fixed **crosshair** shows where the zeroed barrel points.
+- The **impact dot** shows where the ball will land. Put the dot on the target.
+- Drop moves the dot down. Wind from the left moves it right.
+- When the unit is tilted (cant, read from the IMU), the offset rotates so it
+  still follows gravity.
+- Each camera has its own field of view and its own boresight offset, which is
+  set when you zero that camera.
+- When the hold is larger than the view, the dot is flagged as off-screen.
+
+This only works when the camera is **rigidly mounted to the marker and zeroed to
+it**.
+
+Screen resolution near the centre, on a 1920×1080 eyepiece:
+
+| View | px per mrad | with 2× digital zoom |
+|---|---|---|
+| Camera Module 3 Wide (102°) | 0.8 | 1.6 |
+| Camera Module 3 standard (66°) | 1.5 | 3.0 |
+| IMX462 night (~90°) | 1.0 | 1.9 |
+| Lepton 3.5 thermal (57°) | 1.3 | 2.7 |
+
+At 30 m, 1 mrad is 3 cm, which is well under a paintball's spread. The Lepton's
+own pixels are about 6 mrad each, though, so the thermal image is soft even
+though the dot is placed precisely.
+
 ## Set up your own profile
 
 Edit `profiles.json`. The numbers there are starting points, not measurements.
