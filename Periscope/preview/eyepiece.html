@@ -1,0 +1,619 @@
+<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0">
+<title>Periscope Eyepiece</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#0b0e10;--panel:#12171b;--raise:#1a2127;--line:#26303a;
+  --text:#d6dde2;--muted:#7f8c96;--amber:#ffb547;--amber-dim:#8a6428;--red:#ff5a4e;--ok:#5fd08a;
+  --ui:"Barlow Semi Condensed","Arial Narrow",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--text)}
+body{font:16px/1.45 var(--ui);padding-inline:16px;padding-block:20px 40px}
+.wrap{max-width:1320px;margin:0 auto;display:grid;gap:18px}
+header{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 18px}
+h1{margin:0;font-weight:700;font-size:28px;letter-spacing:.02em;text-wrap:balance}
+h1 span{color:var(--amber)}
+header p{margin:0;color:var(--muted);max-width:62ch}
+.main{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:18px;align-items:start}
+@media (max-width:980px){.main{grid-template-columns:minmax(0,1fr)}}
+.eyepiece{background:#050607;border:1px solid var(--line);border-radius:22px;padding:14px;box-shadow:inset 0 0 0 6px #0e1215,0 18px 40px rgba(0,0,0,.45)}
+canvas{display:block;width:100%;height:auto;max-width:100%;aspect-ratio:16/9;border-radius:12px;background:#000}
+.readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:14px}
+.readout div{background:var(--panel);padding:10px 12px;display:grid;gap:2px}
+.readout dt{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.readout dd{margin:0;font:600 18px var(--mono);font-variant-numeric:tabular-nums}
+.readout small{font:12px var(--mono);color:var(--muted)}
+aside{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;display:grid;gap:16px}
+fieldset{border:0;margin:0;padding:0;display:grid;gap:8px}
+legend,.lab{font-size:12px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);padding:0;margin-bottom:6px}
+.seg{display:flex;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:3px;gap:3px}
+.seg button{flex:1;border:0;background:transparent;color:var(--text);font:600 14px var(--ui);padding:7px 4px;border-radius:6px;cursor:pointer;letter-spacing:.03em}
+.seg button[aria-pressed="true"]{background:var(--amber);color:#1b1206}
+.seg button:disabled{opacity:.35;cursor:not-allowed}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:4px 10px}
+.row label{font-size:14px}
+.row output{font:600 13px var(--mono);color:var(--amber);font-variant-numeric:tabular-nums}
+.row input[type=range]{grid-column:1/-1;width:100%;accent-color:var(--amber)}
+select{width:100%;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px;font:500 15px var(--ui)}
+.range-btn{display:flex;gap:8px}
+.range-btn button{flex:1;border:1px solid var(--amber);background:transparent;color:var(--amber);font:700 15px var(--ui);letter-spacing:.08em;text-transform:uppercase;padding:9px;border-radius:9px;cursor:pointer}
+.range-btn button:hover{background:rgba(255,181,71,.1)}
+.check{display:flex;align-items:center;gap:10px;font-size:15px;cursor:pointer}
+.check input{accent-color:var(--amber);width:18px;height:18px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.two label{display:grid;gap:4px;font-size:13px;color:var(--muted)}
+.two input{width:100%;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:7px;font:500 14px var(--mono)}
+.note{color:var(--muted);font-size:14px;max-width:80ch;margin:0}
+.keys{font:12px var(--mono);color:var(--muted)}
+kbd{font:inherit;border:1px solid var(--line);border-radius:4px;padding:0 4px;color:var(--text)}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Periscope <span>Eyepiece</span></h1>
+    <p>What the eyeglass display would show. Move the controls to see the impact dot follow range, wind and tilt.</p>
+  </header>
+
+  <div class="main">
+    <section>
+      <div class="eyepiece"><canvas id="view" width="1280" height="720" aria-label="Simulated eyepiece display"></canvas></div>
+      <dl class="readout" id="readout"></dl>
+    </section>
+
+    <aside>
+      <fieldset>
+        <legend>Camera</legend>
+        <div class="seg" id="mode">
+          <button type="button" data-v="day" aria-pressed="true">Day</button>
+          <button type="button" data-v="night" aria-pressed="false">Night</button>
+          <button type="button" data-v="thermal" aria-pressed="false">Thermal</button>
+          <button type="button" data-v="fusion" aria-pressed="false">Fusion</button>
+        </div>
+        <div class="two">
+          <div>
+            <div class="lab">Day lens</div>
+            <div class="seg" id="lens">
+              <button type="button" data-v="66" aria-pressed="true">66°</button>
+              <button type="button" data-v="102" aria-pressed="false">102°</button>
+            </div>
+          </div>
+          <div>
+            <div class="lab">Zoom</div>
+            <div class="seg" id="zoom">
+              <button type="button" data-v="1" aria-pressed="false">1×</button>
+              <button type="button" data-v="2" aria-pressed="true">2×</button>
+              <button type="button" data-v="4" aria-pressed="false">4×</button>
+            </div>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Ammo profile</legend>
+        <select id="profile" aria-label="Ammo profile"></select>
+      </fieldset>
+
+      <fieldset>
+        <legend>Target</legend>
+        <div class="row"><label for="dist">Actual distance</label><output id="distOut"></output>
+          <input type="range" id="dist" min="5" max="80" step="0.5" value="32"></div>
+        <div class="range-btn"><button type="button" id="rangeBtn">Range</button></div>
+        <label class="check"><input type="checkbox" id="hold"> Aim with the dot (put dot on target)</label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Conditions</legend>
+        <div class="row"><label for="cross">Crosswind</label><output id="crossOut"></output>
+          <input type="range" id="cross" min="-6" max="6" step="0.5" value="2"></div>
+        <div class="row"><label for="head">Headwind</label><output id="headOut"></output>
+          <input type="range" id="head" min="-6" max="6" step="0.5" value="0"></div>
+        <div class="row"><label for="incline">Incline</label><output id="inclineOut"></output>
+          <input type="range" id="incline" min="-30" max="30" step="1" value="0"></div>
+        <div class="row"><label for="cant">Unit tilt (cant)</label><output id="cantOut"></output>
+          <input type="range" id="cant" min="-15" max="15" step="0.5" value="0"></div>
+        <div class="two">
+          <label for="temp">Temp °C<input id="temp" type="number" value="15" min="-20" max="45" step="1"></label>
+          <label for="press">Pressure hPa<input id="press" type="number" value="1013" min="700" max="1060" step="1"></label>
+        </div>
+      </fieldset>
+      <p class="keys"><kbd>1</kbd>–<kbd>4</kbd> camera · <kbd>R</kbd> range · <kbd>H</kbd> aim with dot</p>
+    </aside>
+  </div>
+
+  <p class="note">This is a simulated scene. The trajectory numbers come from the same solver as <code>Periscope/ballistics.py</code>, and the dot placement follows <code>reticle.py</code>, including each camera's field of view. The circle around the dot is a rough estimate of the group size, not a measurement. Paint and BBs scatter, so aim for the middle of the group.</p>
+</div>
+
+<script>
+// ---- Trajectory solver: a line-for-line port of Periscope/ballistics.py ----
+const Ballistics = (() => {
+  const G = 9.80665, FPS = 0.3048, DT = 0.0005, MAXT = 6.0;
+  function density(tC, hPa, rh) {
+    const pSat = 610.78 * Math.pow(10, 7.5 * tC / (tC + 237.3));
+    const pv = pSat * rh / 100, pd = hPa * 100 - pv, k = tC + 273.15;
+    return pd / (287.058 * k) + pv / (461.495 * k);
+  }
+  function impact(p, boreToLos, shot) {
+    const m = p.mass_g / 1000, r = p.diameter_mm / 2000, area = Math.PI * r * r;
+    const rho = density(shot.temp, shot.pressure, shot.humidity);
+    const k = 0.5 * rho * 0.47 * area / m;
+    const v0 = p.muzzle_velocity_fps * FPS;
+    const lps = (p.hop || 0) * G / v0, tau = p.spin_decay_s || 2.0;
+    const wind = [-(shot.headwind || 0), 0, shot.crosswind || 0];
+    const phi = (shot.incline || 0) * Math.PI / 180, cp = Math.cos(phi), sp = Math.sin(phi);
+    const sh = p.sight_height_mm / 1000, sx = -sh * sp, sy = sh * cp;
+    function acc(t, vx, vy, vz) {
+      const rx = vx - wind[0], ry = vy - wind[1], rz = vz - wind[2];
+      const s = Math.sqrt(rx * rx + ry * ry + rz * rz);
+      let ax = -k * s * rx, ay = -k * s * ry - G, az = -k * s * rz;
+      if (lps) {
+        const hz = Math.hypot(rx, rz);
+        if (hz > 1e-9 && s > 1e-9) {
+          const L = lps * s * Math.exp(-t / tau);
+          ax += L * (-ry * rx / (hz * s)); ay += L * (hz / s); az += L * (-ry * rz / (hz * s));
+        }
+      }
+      return [ax, ay, az];
+    }
+    const el = phi + boreToLos;
+    let t = 0, x = 0, y = 0, z = 0, vx = v0 * Math.cos(el), vy = v0 * Math.sin(el), vz = 0, h = DT, prev = null;
+    while (t < MAXT) {
+      const along = (x - sx) * cp + (y - sy) * sp;
+      if (along >= shot.range) {
+        if (!prev) return null;
+        const [pt, px, py, pz, pvx, pvy, pvz, pa] = prev, f = (shot.range - pa) / (along - pa);
+        const ix = px + f * (x - px), iy = py + f * (y - py), iz = pz + f * (z - pz);
+        const spd = Math.hypot(pvx + f * (vx - pvx), pvy + f * (vy - pvy), pvz + f * (vz - pvz));
+        const above = -(ix - sx) * sp + (iy - sy) * cp;
+        return { drop: -above, drift: -iz, t: pt + f * (t - pt), speed: spd };
+      }
+      if (vx <= 0) return null;
+      prev = [t, x, y, z, vx, vy, vz, along];
+      const a1 = acc(t, vx, vy, vz);
+      const v2 = [vx + a1[0] * h / 2, vy + a1[1] * h / 2, vz + a1[2] * h / 2], a2 = acc(t + h / 2, ...v2);
+      const v3 = [vx + a2[0] * h / 2, vy + a2[1] * h / 2, vz + a2[2] * h / 2], a3 = acc(t + h / 2, ...v3);
+      const v4 = [vx + a3[0] * h, vy + a3[1] * h, vz + a3[2] * h], a4 = acc(t + h, ...v4);
+      x += h / 6 * (vx + 2 * v2[0] + 2 * v3[0] + v4[0]);
+      y += h / 6 * (vy + 2 * v2[1] + 2 * v3[1] + v4[1]);
+      z += h / 6 * (vz + 2 * v2[2] + 2 * v3[2] + v4[2]);
+      vx += h / 6 * (a1[0] + 2 * a2[0] + 2 * a3[0] + a4[0]);
+      vy += h / 6 * (a1[1] + 2 * a2[1] + 2 * a3[1] + a4[1]);
+      vz += h / 6 * (a1[2] + 2 * a2[2] + 2 * a3[2] + a4[2]);
+      t += h;
+    }
+    return null;
+  }
+  function zeroAngle(p, atm) {
+    const shot = { range: p.zero_m, ...atm };
+    const miss = a => { const r = impact(p, a, shot); return r ? r.drop : null; };
+    const D = Math.PI / 180;
+    let a = -5 * D, b;
+    for (;;) {
+      b = a + 0.25 * D;
+      const db = miss(b);
+      if (db !== null && db <= 0) break;
+      a = b;
+      if (a > 15 * D) return null;
+    }
+    for (let i = 0; i < 40; i++) {
+      const mid = (a + b) / 2, d = miss(mid);
+      if (d !== null && d > 0) a = mid; else b = mid;
+    }
+    return (a + b) / 2;
+  }
+  function solve(p, shot, zero) {
+    const r = impact(p, zero, shot);
+    if (!r) return null;
+    const m = p.mass_g / 1000;
+    return {
+      range: shot.range, dropM: r.drop, driftM: r.drift,
+      dropMrad: Math.atan2(r.drop, shot.range) * 1000, driftMrad: Math.atan2(r.drift, shot.range) * 1000,
+      tof: r.t, fps: r.speed / FPS, energy: 0.5 * m * r.speed * r.speed,
+    };
+  }
+  return { solve, zeroAngle };
+})();
+
+// Same values as Periscope/profiles.json, plus a rough group size for the preview circle.
+const PROFILES = {
+  paintball_68:       { name: "Paintball .68, 285 fps", mass_g: 3.1, diameter_mm: 17.3, muzzle_velocity_fps: 285, sight_height_mm: 60, zero_m: 20, hop: 0, group_mrad: 12 },
+  paintball_flatline: { name: "Paintball .68 flatline, 285 fps", mass_g: 3.1, diameter_mm: 17.3, muzzle_velocity_fps: 285, sight_height_mm: 60, zero_m: 25, hop: 0.6, spin_decay_s: 1.5, group_mrad: 10 },
+  airsoft_020:        { name: "Airsoft 0.20 g, 350 fps", mass_g: 0.20, diameter_mm: 5.95, muzzle_velocity_fps: 350, sight_height_mm: 60, zero_m: 30, hop: 1.0, spin_decay_s: 2.0, group_mrad: 6 },
+  airsoft_028:        { name: "Airsoft 0.28 g, 296 fps", mass_g: 0.28, diameter_mm: 5.95, muzzle_velocity_fps: 296, sight_height_mm: 60, zero_m: 30, hop: 1.0, spin_decay_s: 2.0, group_mrad: 5 },
+};
+
+// ---- State ----
+const $ = id => document.getElementById(id);
+const S = {
+  mode: "day", lens: 66, zoom: 2, profile: "paintball_68",
+  dist: 32, ranged: 32, rangedAt: -1e9, ranging: 0,
+  cross: 2, head: 0, incline: 0, cant: 0, temp: 15, press: 1013, hold: false,
+};
+let zero = null, zeroKey = "", sol = null;
+
+const sel = $("profile");
+for (const [k, p] of Object.entries(PROFILES)) sel.add(new Option(p.name, k));
+
+function segment(id, key, cast = v => v) {
+  const el = $(id);
+  el.addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b || b.disabled) return;
+    S[key] = cast(b.dataset.v); syncSeg(); update();
+  });
+}
+function syncSeg() {
+  for (const [id, key] of [["mode", "mode"], ["lens", "lens"], ["zoom", "zoom"]])
+    for (const b of $(id).children) b.setAttribute("aria-pressed", String(b.dataset.v == S[key]));
+  for (const b of $("lens").children) b.disabled = S.mode !== "day";
+}
+segment("mode", "mode"); segment("lens", "lens", Number); segment("zoom", "zoom", Number);
+
+const fmt = {
+  dist: v => `${(+v).toFixed(1)} m`,
+  cross: v => v == 0 ? "calm" : `${Math.abs(v).toFixed(1)} m/s ${v > 0 ? "from left" : "from right"}`,
+  head: v => v == 0 ? "calm" : `${Math.abs(v).toFixed(1)} m/s ${v > 0 ? "head" : "tail"}`,
+  incline: v => `${v > 0 ? "+" : ""}${v}° ${v > 0 ? "uphill" : v < 0 ? "downhill" : "level"}`,
+  cant: v => `${(+v).toFixed(1)}°${v > 0 ? " right" : v < 0 ? " left" : ""}`,
+};
+for (const id of ["dist", "cross", "head", "incline", "cant"]) {
+  $(id).addEventListener("input", () => { S[id] = +$(id).value; update(); });
+}
+$("temp").addEventListener("input", () => { S.temp = +$("temp").value || 15; update(); });
+$("press").addEventListener("input", () => { S.press = +$("press").value || 1013; update(); });
+sel.addEventListener("change", () => { S.profile = sel.value; update(); });
+$("hold").addEventListener("change", () => { S.hold = $("hold").checked; update(); });
+$("rangeBtn").addEventListener("click", fireRange);
+document.addEventListener("keydown", e => {
+  if (e.target.matches("input,select,textarea")) return;
+  const modes = ["day", "night", "thermal", "fusion"];
+  if (e.key >= "1" && e.key <= "4") { S.mode = modes[+e.key - 1]; syncSeg(); update(); }
+  else if (e.key === "r" || e.key === "R") fireRange();
+  else if (e.key === "h" || e.key === "H") { S.hold = !S.hold; $("hold").checked = S.hold; update(); }
+});
+
+function fireRange() {
+  S.ranging = performance.now();
+  // Rangefinder reading: true distance plus about +/-5 cm of noise, like a TF02-Pro.
+  S.ranged = Math.round((S.dist + (Math.random() - 0.5) * 0.1) * 10) / 10;
+  setTimeout(() => { S.rangedAt = performance.now(); update(); }, 350);
+  kick();
+}
+
+// ---- Camera views (reticle.py) ----
+function viewFor(mode) {
+  const base = mode === "day" ? S.lens : mode === "thermal" ? 57 : 90;
+  const hfov = 2 * Math.atan(Math.tan(base * Math.PI / 360) / S.zoom);
+  // Thermal is 4:3, shown pillarboxed in the 16:9 eyepiece.
+  const w = mode === "thermal" ? 960 : 1280;
+  return { hfov, w, h: 720, x0: (1280 - w) / 2, f: (w / 2) / Math.tan(hfov / 2) };
+}
+const lensName = { day: () => S.lens === 66 ? "CAM3 66°" : "CAM3W 102°", night: () => "IMX462 90°", thermal: () => "LEPTON 57°", fusion: () => "IMX462+LEPTON" };
+
+function update() {
+  for (const id of ["dist", "cross", "head", "incline", "cant"]) $(id + "Out").textContent = fmt[id](S[id]);
+  const p = PROFILES[S.profile];
+  const atm = { temp: S.temp, pressure: S.press, humidity: 50 };
+  const key = `${S.profile}|${S.temp}|${S.press}`;
+  if (key !== zeroKey) { zero = Ballistics.zeroAngle(p, atm); zeroKey = key; }
+  sol = zero === null ? null : Ballistics.solve(p, {
+    range: S.ranged, crosswind: S.cross, headwind: S.head, incline: S.incline, ...atm,
+  }, zero);
+  renderReadout(p);
+  kick();
+}
+
+function renderReadout(p) {
+  const r = $("readout");
+  const stale = Math.abs(S.ranged - S.dist) > 0.3;
+  const cell = (t, v, s) => `<div><dt>${t}</dt><dd>${v}</dd><small>${s}</small></div>`;
+  if (!sol) { r.innerHTML = cell("Range", `${S.ranged.toFixed(1)} m`, "out of range for this ammo"); return; }
+  const up = sol.dropMrad, wind = sol.driftMrad;
+  r.innerHTML =
+    cell("Range", `${S.ranged.toFixed(1)} m`, stale ? "target moved: press Range" : "laser reading") +
+    cell("Hold", `${up >= 0 ? "▲" : "▼"} ${Math.abs(up).toFixed(1)} mrad`, `${Math.abs(sol.dropM * 100).toFixed(0)} cm ${up >= 0 ? "up" : "down"}`) +
+    cell("Wind hold", `${Math.abs(wind) < 0.05 ? "–" : wind > 0 ? "▶" : "◀"} ${Math.abs(wind).toFixed(1)} mrad`, `${Math.abs(sol.driftM * 100).toFixed(0)} cm ${wind > 0 ? "right" : wind < 0 ? "left" : ""}`) +
+    cell("Flight time", `${sol.tof.toFixed(2)} s`, `${sol.fps.toFixed(0)} fps at target`) +
+    cell("Energy", `${sol.energy.toFixed(2)} J`, `zero ${p.zero_m} m · sight +${p.sight_height_mm} mm`);
+}
+
+// ---- Scene ----
+function rng(seed) { return () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296; }
+const R = rng(7);
+const OBJ = [];
+const INFL = [["#c8342e", 0.35], ["#2d5fb8", 0.3], ["#e0b020", 0.55], ["#2a2d31", 0.18]];
+for (let i = 0; i < 16; i++) {
+  const d = 7 + R() * 68, [col, nir] = INFL[Math.floor(R() * 4)], t = Math.floor(R() * 4);
+  const lat = (R() - 0.5) * 2 * (4 + d * 0.45);
+  if (Math.abs(lat) < 1.6 + d * 0.02) continue; // keep the lane to the target clear
+  const shape = [["can", 1.0, 1.25], ["dorito", 1.3, 1.1], ["snake", 4.2, 0.75], ["wall", 2.2, 1.8]][t];
+  OBJ.push({ kind: "bunker", shape: shape[0], d, lat, w: shape[1], h: shape[2], day: col, nir, temp: 11 });
+}
+for (let i = 0; i < 30; i++) {
+  const d = 95 + R() * 90;
+  OBJ.push({ kind: "tree", d, lat: (R() - 0.5) * 2 * 110, w: 4 + R() * 4, h: 8 + R() * 8, day: R() > 0.5 ? "#2f5a2a" : "#3b6630", nir: 0.8, temp: 9.5 });
+}
+const CAMH = 1.5, AIMH = 1.25;
+
+function norm(temp) { return Math.max(0, Math.min(1, (temp - 0) / 36)); }
+function tint(v, mode) {
+  v = Math.max(0, Math.min(1, v));
+  if (mode === "thermal") { const g = Math.round(v * 255); return `rgb(${g},${g},${g})`; }
+  return `rgb(${Math.round(v * 205)},${Math.round(v * 235)},${Math.round(v * 200)})`;
+}
+function mix(hex, to, a) {
+  const n = parseInt(hex.slice(1), 16), m = parseInt(to.slice(1), 16);
+  const c = s => Math.round(((n >> s) & 255) * (1 - a) + ((m >> s) & 255) * a);
+  return `rgb(${c(16)},${c(8)},${c(0)})`;
+}
+function colorOf(o, mode, part) {
+  if (mode === "day") return mix(part === "trunk" ? "#4b3a2a" : o.day, "#c9dcea", Math.min(0.55, o.d / 320));
+  if (mode === "night") return tint((part === "trunk" ? 0.25 : o.nir) * 0.55 + 0.04, mode);
+  return tint(norm(part === "head" ? 34 : o.temp), "thermal");
+}
+
+// Draws the scene into ctx (w x h pixels) with focal length f, the target centred,
+// then shifted by (sx, sy) and rolled by the unit's cant.
+function drawScene(ctx, w, h, f, mode, sx, sy, cantRad, targetD) {
+  const cx = w / 2, cy = h / 2;
+  const P = (d, lat, ht) => [cx + f * lat / d, cy + f * ((CAMH - ht) / d - (CAMH - AIMH) / targetD)];
+  ctx.save();
+  ctx.translate(sx, sy); ctx.translate(cx, cy); ctx.rotate(-cantRad); ctx.translate(-cx, -cy);
+  const big = Math.max(w, h) * 2;
+  const horizon = cy - f * (CAMH - AIMH) / targetD;
+  // Sky
+  if (mode === "day") {
+    const g = ctx.createLinearGradient(0, horizon - h, 0, horizon);
+    g.addColorStop(0, "#7fb1e0"); g.addColorStop(1, "#d5e6f3"); ctx.fillStyle = g;
+  } else ctx.fillStyle = mode === "night" ? tint(0.07, mode) : tint(0, "thermal");
+  ctx.fillRect(-big, horizon - big, big * 3, big);
+  // Ground
+  if (mode === "day") {
+    const g = ctx.createLinearGradient(0, horizon, 0, h * 1.2);
+    g.addColorStop(0, "#9fb07a"); g.addColorStop(0.25, "#7e9a52"); g.addColorStop(1, "#5a7a36"); ctx.fillStyle = g;
+  } else if (mode === "night") {
+    const g = ctx.createLinearGradient(0, horizon, 0, h * 1.2);
+    g.addColorStop(0, tint(0.3, mode)); g.addColorStop(1, tint(0.45, mode)); ctx.fillStyle = g;
+  } else {
+    const g = ctx.createLinearGradient(0, horizon, 0, h * 1.2);
+    g.addColorStop(0, tint(norm(10.5), "thermal")); g.addColorStop(1, tint(norm(13), "thermal")); ctx.fillStyle = g;
+  }
+  ctx.fillRect(-big, horizon, big * 3, big);
+  // Distance bands on the field (mowing lines every 10 m)
+  ctx.globalAlpha = mode === "thermal" ? 0.08 : 0.12;
+  ctx.fillStyle = mode === "day" ? "#ffffff" : mode === "night" ? tint(0.9, mode) : "#ffffff";
+  for (let d = 10; d <= 90; d += 10) {
+    const [, y1] = P(d, 0, 0), [, y2] = P(d + 1.2, 0, 0);
+    ctx.fillRect(-big, y2, big * 3, Math.max(0.6, y1 - y2));
+  }
+  ctx.globalAlpha = 1;
+
+  const all = [...OBJ, { kind: "target", d: targetD, lat: 0, temp: 30.5, day: "#394150", nir: 0.2 }];
+  all.sort((a, b) => b.d - a.d);
+  for (const o of all) {
+    if (o.d < 1.5) continue;
+    if (o.kind === "tree") {
+      const [x, yb] = P(o.d, o.lat, 0), [, yt] = P(o.d, o.lat, o.h), s = f / o.d;
+      ctx.fillStyle = colorOf(o, mode, "trunk"); ctx.fillRect(x - 0.18 * s, yb - (yb - yt) * 0.45, 0.36 * s, (yb - yt) * 0.45);
+      ctx.fillStyle = colorOf(o, mode);
+      ctx.beginPath(); ctx.ellipse(x, yt + (yb - yt) * 0.38, o.w * s / 2, (yb - yt) * 0.42, 0, 0, Math.PI * 2); ctx.fill();
+    } else if (o.kind === "bunker") {
+      const [x, yb] = P(o.d, o.lat, 0), [, yt] = P(o.d, o.lat, o.h), s = f / o.d, hw = o.w * s / 2;
+      ctx.fillStyle = colorOf(o, mode);
+      ctx.beginPath();
+      if (o.shape === "dorito") { ctx.moveTo(x - hw, yb); ctx.lineTo(x, yt); ctx.lineTo(x + hw, yb); }
+      else ctx.roundRect(x - hw, yt, hw * 2, yb - yt, Math.min(hw, (yb - yt)) * (o.shape === "can" ? 0.45 : 0.3));
+      ctx.fill();
+      if (mode === "day") { ctx.fillStyle = "rgba(255,255,255,.18)"; ctx.fillRect(x - hw * 0.7, yt + (yb - yt) * 0.15, hw * 0.25, (yb - yt) * 0.6); }
+    } else {
+      // Target: a standing player silhouette (stand-in for an opposing player).
+      const s = f / o.d, [x, yb] = P(o.d, 0, 0);
+      const Y = ht => yb - ht * s;
+      ctx.fillStyle = colorOf(o, mode);
+      ctx.fillRect(x - 0.17 * s, Y(0.85), 0.14 * s, 0.85 * s);
+      ctx.fillRect(x + 0.03 * s, Y(0.85), 0.14 * s, 0.85 * s);
+      ctx.beginPath(); ctx.roundRect(x - 0.24 * s, Y(1.52), 0.48 * s, 0.72 * s, 0.08 * s); ctx.fill();
+      ctx.fillRect(x - 0.33 * s, Y(1.48), 0.1 * s, 0.58 * s); ctx.fillRect(x + 0.23 * s, Y(1.48), 0.1 * s, 0.58 * s);
+      ctx.fillStyle = colorOf(o, mode, "head");
+      ctx.beginPath(); ctx.arc(x, Y(1.66), 0.12 * s, 0, Math.PI * 2); ctx.fill();
+      if (mode === "day") {
+        ctx.fillStyle = "#15181c"; ctx.fillRect(x - 0.1 * s, Y(1.7), 0.2 * s, 0.07 * s); // goggles
+        ctx.fillStyle = "#d9a441"; ctx.fillRect(x - 0.24 * s, Y(1.3), 0.48 * s, 0.05 * s); // armband
+      }
+    }
+  }
+  ctx.restore();
+}
+
+// ---- Rendering ----
+const cv = $("view"), ctx = cv.getContext("2d");
+const low = document.createElement("canvas"), lctx = low.getContext("2d", { willReadFrequently: true });
+const noise = document.createElement("canvas"); noise.width = noise.height = 256;
+{
+  const n = noise.getContext("2d"), img = n.createImageData(256, 256);
+  for (let i = 0; i < img.data.length; i += 4) { const v = Math.random() * 255; img.data[i] = img.data[i + 1] = img.data[i + 2] = v; img.data[i + 3] = 255; }
+  n.putImageData(img, 0, 0);
+}
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function impactOffset(view) {
+  if (!sol) return null;
+  const right = -sol.driftMrad / 1000, down = sol.dropMrad / 1000, c = S.cant * Math.PI / 180;
+  const sr = right * Math.cos(c) + down * Math.sin(c), sd = -right * Math.sin(c) + down * Math.cos(c);
+  return [view.f * Math.tan(sr), view.f * Math.tan(sd)];
+}
+
+function draw(now) {
+  const mode = S.mode, v = viewFor(mode);
+  const off = impactOffset(v);
+  const shift = S.hold && off ? off : [0, 0];
+  const cant = S.cant * Math.PI / 180;
+  ctx.fillStyle = "#000"; ctx.fillRect(0, 0, 1280, 720);
+
+  ctx.save(); ctx.beginPath(); ctx.rect(v.x0, 0, v.w, v.h); ctx.clip();
+  if (mode === "thermal") {
+    low.width = 160; low.height = 120;
+    const k = 160 / v.w;
+    drawScene(lctx, 160, 120, v.f * k, "thermal", shift[0] * k, shift[1] * k, cant, S.dist);
+    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(low, v.x0, 0, v.w, v.h);
+  } else {
+    ctx.save(); ctx.translate(v.x0, 0);
+    drawScene(ctx, v.w, v.h, v.f, mode === "fusion" ? "night" : mode, shift[0], shift[1], cant, S.dist);
+    ctx.restore();
+    if (mode === "night" || mode === "fusion") {
+      ctx.globalAlpha = 0.13; ctx.globalCompositeOperation = "overlay";
+      const ox = reduceMotion ? 0 : Math.floor(Math.random() * 256), oy = reduceMotion ? 0 : Math.floor(Math.random() * 256);
+      ctx.fillStyle = ctx.createPattern(noise, "repeat");
+      ctx.translate(-ox, -oy); ctx.fillRect(ox, oy, 1280, 720); ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.globalAlpha = 1; ctx.globalCompositeOperation = "source-over";
+    }
+    if (mode === "fusion") {
+      low.width = 320; low.height = 180;
+      const k = 320 / 1280;
+      drawScene(lctx, 320, 180, v.f * k, "thermal", shift[0] * k, shift[1] * k, cant, S.dist);
+      const img = lctx.getImageData(0, 0, 320, 180), d = img.data;
+      for (let i = 0; i < d.length; i += 4) {
+        const val = d[i] / 255, a = Math.max(0, Math.min(1, (val - 0.6) / 0.18));
+        d[i] = 255; d[i + 1] = 150; d[i + 2] = 40; d[i + 3] = a * 210;
+      }
+      lctx.putImageData(img, 0, 0);
+      ctx.imageSmoothingEnabled = true; ctx.drawImage(low, 0, 0, 1280, 720);
+    }
+  }
+  // Eyepiece vignette
+  const vg = ctx.createRadialGradient(640, 360, 250, 640, 360, 760);
+  vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,.55)");
+  ctx.fillStyle = vg; ctx.fillRect(0, 0, 1280, 720);
+  ctx.restore();
+
+  drawHud(v, off, now);
+}
+
+const AMBER = "#ffb547", RED = "#ff4d42";
+function hudText(t, x, y, align = "left", size = 22, color = AMBER, weight = 600) {
+  ctx.font = `${weight} ${size}px "JetBrains Mono", monospace`;
+  ctx.textAlign = align; ctx.textBaseline = "alphabetic";
+  ctx.lineWidth = 4; ctx.strokeStyle = "rgba(0,0,0,.65)"; ctx.strokeText(t, x, y);
+  ctx.fillStyle = color; ctx.fillText(t, x, y);
+}
+function shadowed(fn) {
+  ctx.save(); ctx.strokeStyle = "rgba(0,0,0,.6)"; ctx.lineWidth = 5; fn(true); ctx.restore();
+  ctx.save(); fn(false); ctx.restore();
+}
+
+function drawHud(v, off, now) {
+  const cx = 640, cy = 360, p = PROFILES[S.profile];
+  // Fixed crosshair (where the zeroed barrel points)
+  shadowed(sh => {
+    if (!sh) { ctx.strokeStyle = AMBER; ctx.lineWidth = 2; }
+    ctx.beginPath();
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { ctx.moveTo(cx + dx * 14, cy + dy * 14); ctx.lineTo(cx + dx * 70, cy + dy * 70); }
+    ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx, cy, 2.5, 0, Math.PI * 2); ctx.stroke();
+  });
+  // Mil ticks every 10 mrad along the vertical line (true to the current view)
+  const mil = v.f * 0.01;
+  if (mil >= 22) shadowed(sh => {
+    if (!sh) { ctx.strokeStyle = AMBER; ctx.lineWidth = 1.5; }
+    ctx.beginPath();
+    for (let i = 1; i * mil < 330; i++) { ctx.moveTo(cx - 6, cy + i * mil); ctx.lineTo(cx + 6, cy + i * mil); }
+    ctx.stroke();
+  });
+
+  // Impact dot + estimated group
+  const stale = Math.abs(S.ranged - S.dist) > 0.3;
+  const ranging = now - S.ranging < 350;
+  if (off && !ranging) {
+    let x = cx + off[0], y = cy + off[1];
+    const inView = x > v.x0 + 10 && x < v.x0 + v.w - 10 && y > 10 && y < 710;
+    if (inView) {
+      const gr = v.f * Math.tan(p.group_mrad / 1000);
+      shadowed(sh => {
+        if (!sh) { ctx.strokeStyle = stale ? "rgba(255,77,66,.45)" : "rgba(255,77,66,.8)"; ctx.lineWidth = 1.5; ctx.setLineDash([6, 6]); }
+        ctx.beginPath(); ctx.arc(x, y, Math.max(gr, 8), 0, Math.PI * 2); ctx.stroke();
+      });
+      // Ring with a centre point, so the target stays visible inside it.
+      const col = stale ? "rgba(255,77,66,.5)" : RED;
+      ctx.beginPath(); ctx.arc(x, y, 8, 0, Math.PI * 2);
+      ctx.lineWidth = 5; ctx.strokeStyle = "rgba(0,0,0,.6)"; ctx.stroke();
+      ctx.lineWidth = 2.5; ctx.strokeStyle = col; ctx.stroke();
+      ctx.beginPath(); ctx.arc(x, y, 1.8, 0, Math.PI * 2); ctx.fillStyle = col; ctx.fill();
+      // Leader from crosshair to dot
+      if (Math.hypot(off[0], off[1]) > 24) shadowed(sh => {
+        if (!sh) { ctx.strokeStyle = "rgba(255,77,66,.55)"; ctx.lineWidth = 1; ctx.setLineDash([2, 5]); }
+        ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(x, y); ctx.stroke();
+      });
+    } else {
+      const ang = Math.atan2(off[1], off[0]);
+      const ex = Math.max(v.x0 + 40, Math.min(v.x0 + v.w - 40, cx + Math.cos(ang) * 1000));
+      const ey = Math.max(40, Math.min(680, cy + Math.sin(ang) * 1000));
+      ctx.save(); ctx.translate(ex, ey); ctx.rotate(ang);
+      ctx.beginPath(); ctx.moveTo(18, 0); ctx.lineTo(-10, -12); ctx.lineTo(-10, 12); ctx.closePath();
+      ctx.fillStyle = RED; ctx.fill(); ctx.restore();
+      hudText("HOLD OFF SCREEN: ZOOM OUT", cx, 660, "center", 20, RED);
+    }
+  }
+
+  // Top-left: camera / top-right: power
+  const L = v.x0 + 22, Rt = v.x0 + v.w - 22;
+  hudText(`${S.mode.toUpperCase()} · ${lensName[S.mode]()} · ${S.zoom}×`, L, 38, "left", 20);
+  hudText(`${p.name.toUpperCase()}`, L, 64, "left", 16, "rgba(255,181,71,.75)", 400);
+  hudText("▮▮▮▯ 78%", Rt, 38, "right", 20);
+  hudText(`${S.temp}°C ${S.press} hPa`, Rt, 64, "right", 16, "rgba(255,181,71,.75)", 400);
+
+  // Cant indicator (top centre)
+  const tiltBad = Math.abs(S.cant) > 2;
+  shadowed(sh => {
+    if (!sh) { ctx.strokeStyle = tiltBad ? RED : AMBER; ctx.lineWidth = 2; }
+    ctx.beginPath(); ctx.arc(cx, 150, 90, Math.PI * 1.35, Math.PI * 1.65); ctx.stroke();
+    const a = -Math.PI / 2 + S.cant * Math.PI / 180 * 1.4;
+    ctx.beginPath(); ctx.moveTo(cx + Math.cos(a) * 80, 150 + Math.sin(a) * 80); ctx.lineTo(cx + Math.cos(a) * 100, 150 + Math.sin(a) * 100); ctx.stroke();
+  });
+  if (tiltBad) hudText(`LEVEL ${Math.abs(S.cant).toFixed(1)}° ${S.cant > 0 ? "◀" : "▶"}`, cx, 38, "center", 18, RED);
+
+  // Bottom-left: range
+  if (ranging) hudText("RANGING…", L, 690, "left", 30, AMBER, 600);
+  else {
+    hudText(`${S.ranged.toFixed(1)} m`, L, 690, "left", 34, stale ? "rgba(255,181,71,.45)" : AMBER);
+    hudText(stale ? "PRESS RANGE" : `LRF · ${S.incline > 0 ? "▲" : S.incline < 0 ? "▼" : "–"} ${Math.abs(S.incline)}°`, L, 652, "left", 16, stale ? RED : "rgba(255,181,71,.75)", 400);
+  }
+  // Bottom-right: holds
+  if (sol) {
+    const up = sol.dropMrad, wd = sol.driftMrad;
+    hudText(`${up >= 0 ? "▲" : "▼"} ${Math.abs(up).toFixed(1)}  ${Math.abs(wd) < 0.05 ? "–" : wd > 0 ? "▶" : "◀"} ${Math.abs(wd).toFixed(1)} mrad`, Rt, 690, "right", 26);
+    hudText(`${sol.tof.toFixed(2)} s · ${sol.fps.toFixed(0)} fps`, Rt, 652, "right", 16, "rgba(255,181,71,.75)", 400);
+  } else hudText("OUT OF RANGE", Rt, 690, "right", 26, RED);
+
+  // Wind arrow
+  if (S.cross !== 0) {
+    const wx = Rt - 30 - (18 + Math.abs(S.cross) * 7), wy = 612, len = 18 + Math.abs(S.cross) * 7, dir = Math.sign(S.cross);
+    shadowed(sh => {
+      if (!sh) { ctx.strokeStyle = AMBER; ctx.lineWidth = 2.5; }
+      ctx.beginPath(); ctx.moveTo(wx - dir * len, wy); ctx.lineTo(wx + dir * len, wy);
+      ctx.moveTo(wx + dir * len, wy); ctx.lineTo(wx + dir * (len - 9), wy - 7);
+      ctx.moveTo(wx + dir * len, wy); ctx.lineTo(wx + dir * (len - 9), wy + 7); ctx.stroke();
+    });
+    hudText(`WIND ${Math.abs(S.cross)} m/s`, wx - 30 - (18 + Math.abs(S.cross) * 7), wy + 6, "right", 15, "rgba(255,181,71,.75)", 400);
+  }
+}
+
+// ---- Loop: runs only while something is animating ----
+let raf = 0, last = 0;
+function kick() { if (!raf) raf = requestAnimationFrame(loop); }
+function loop(now) {
+  raf = 0;
+  const animating = (!reduceMotion && (S.mode === "night" || S.mode === "fusion")) || now - S.ranging < 400;
+  if (!animating || now - last > 40) { draw(now); last = now; }
+  if (animating) kick();
+}
+
+syncSeg();
+(document.fonts ? document.fonts.ready : Promise.resolve()).then(() => { S.rangedAt = 0; update(); });
+update();
+</script>
+</body></html>
