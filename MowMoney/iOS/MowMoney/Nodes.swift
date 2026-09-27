@@ -8,7 +8,9 @@ private let carColors: [UInt32] = [0x2b5fa8, 0xc7332b, 0xe9e4d8, 0x333a40]
 // MARK: - Shape helpers
 
 func shape(rect: CGRect, corner: CGFloat = 0, fill: UIColor, stroke: UIColor? = nil, line: CGFloat = 0) -> SKShapeNode {
-    let n = corner > 0 ? SKShapeNode(rect: rect, cornerRadius: corner) : SKShapeNode(rect: rect)
+    // CoreGraphics rejects a corner radius larger than half the shorter side.
+    let r = min(corner, min(abs(rect.width), abs(rect.height)) / 2 - 0.01)
+    let n = r > 0 ? SKShapeNode(rect: rect, cornerRadius: r) : SKShapeNode(rect: rect)
     n.fillColor = fill
     n.strokeColor = stroke ?? .clear
     n.lineWidth = stroke == nil ? 0 : line
@@ -242,14 +244,7 @@ extension GameScene {
         node.addChild(shape(circle: CGPoint(x: 0.12 * U, y: -r * 0.7), radius: r * 0.55, fill: UIColor(white: 0, alpha: 0.25)))
         let body = SKNode()
         body.addChild(shape(circle: .zero, radius: r, fill: kind.color, stroke: .white, line: 3 * camScale))
-        let label = SKLabelNode(fontNamed: nil)
-        label.attributedText = NSAttributedString(string: kind.glyph, attributes: [
-            .font: roundedFont(r * 1.15, .black),
-            .foregroundColor: UIColor.white,
-        ])
-        label.verticalAlignmentMode = .center
-        label.horizontalAlignmentMode = .center
-        body.addChild(label)
+        body.addChild(makeLabel(kind.glyph, size: r * 1.15, color: .white))
         let bob = SKAction.sequence([.moveBy(x: 0, y: 3 * camScale, duration: 0.3), .moveBy(x: 0, y: -3 * camScale, duration: 0.3)])
         body.run(.repeatForever(bob))
         node.addChild(body)
@@ -258,15 +253,7 @@ extension GameScene {
 
     func spawnFloat(_ x: Double, _ y: Double, _ text: String, _ color: UIColor, big: Bool = false) {
         let size = (big ? 24 : 18) * camScale
-        let label = SKLabelNode(fontNamed: nil)
-        label.attributedText = NSAttributedString(string: text, attributes: [
-            .font: roundedFont(size, .black),
-            .foregroundColor: color,
-            .strokeColor: inkColor,
-            .strokeWidth: -5.0,
-        ])
-        label.verticalAlignmentMode = .center
-        label.horizontalAlignmentMode = .center
+        let label = makeLabel(text, size: size, color: color, outline: 1.5 * camScale)
         label.position = sp(x, y)
         label.zPosition = 8
         world.addChild(label)
@@ -275,6 +262,31 @@ extension GameScene {
                     .sequence([.wait(forDuration: 0.5), .fadeOut(withDuration: 0.5)])]),
             .removeFromParent(),
         ]))
+    }
+
+    /// Text in a built-in font. Never create an SKLabelNode with a nil font name: SpriteKit crashes when it draws it.
+    /// `outline` > 0 adds ink-colored copies behind the text for a hard outline.
+    func makeLabel(_ text: String, size: CGFloat, color: UIColor, outline: CGFloat = 0) -> SKNode {
+        func label(_ c: UIColor) -> SKLabelNode {
+            let l = SKLabelNode(fontNamed: "AvenirNext-Heavy")
+            l.text = text
+            l.fontSize = size
+            l.fontColor = c
+            l.verticalAlignmentMode = .center
+            l.horizontalAlignmentMode = .center
+            return l
+        }
+        let node = SKNode()
+        if outline > 0 {
+            let offsets: [(CGFloat, CGFloat)] = [(outline, 0), (-outline, 0), (0, outline), (0, -outline), (0, -outline * 2)]
+            for (dx, dy) in offsets {
+                let back = label(inkColor)
+                back.position = CGPoint(x: dx, y: dy)
+                node.addChild(back)
+            }
+        }
+        node.addChild(label(color))
+        return node
     }
 
     func setupClippings() {
