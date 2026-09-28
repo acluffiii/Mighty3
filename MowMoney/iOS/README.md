@@ -11,7 +11,8 @@ This is a native iOS version of the Mow Money web game (`../index.html`), built 
 2. In the new project, delete the template's `ContentView.swift` and `MowMoneyApp.swift` (choose **Move to Trash**).
 3. Drag the `MowMoney/iOS/MowMoney` folder from this repo into the Xcode project navigator. Check **Copy items if needed** and your app target.
 4. Under **Target → General**, set **Minimum Deployments** to iOS 16.0 or later.
-5. Pick an iPhone simulator and press **⌘R**.
+5. **App icon:** in the project navigator, delete Xcode's own `Assets.xcassets` and drag in `MowMoney/iOS/MowMoney/Assets.xcassets` from this repo. Or open **Assets → AppIcon** and drop `AppIcon/AppIcon-1024.png` onto the slot. The source drawing is `AppIcon/icon.svg`.
+6. Pick an iPhone simulator and press **⌘R**.
 
 Portrait orientation is locked in code (`AppDelegate` in `MowMoneyApp.swift`), so you don't need to change orientation settings.
 
