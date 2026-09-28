@@ -66,7 +66,8 @@
     <rect x="800" y="752" width="30" height="60" rx="8" fill="#23272a" stroke-width="10"/>
 
     <!-- seat -->
-    <path d="M292 742 V 630 Q 292 606 318 606 H 336 Q 356 606 356 630 V 700 H 452 Q 470 700 470 718 V 742 Z" fill="#23272a"/>
+    <path d="M292 706 V 630 Q 292 606 318 606 H 336 Q 356 606 356 630 V 706 Z" fill="#23272a" transform="rotate(-12 324 720)"/>
+    <path d="M292 742 V 700 H 452 Q 470 700 470 718 V 742 Z" fill="#23272a"/>
 
     <!-- steering column -->
     <line x1="590" y1="720" x2="548" y2="598" fill="none" stroke-width="18"/>
@@ -77,13 +78,15 @@
     <!-- boot -->
     <path d="M512 800 H 574 Q 596 800 596 822 V 836 H 512 Z" fill="#6b3f22"/>
 
-    <!-- shirt -->
+    <!-- shirt (upper body reclined 12 degrees around the hip) -->
+    <g transform="rotate(-12 400 700)">
     <path d="M338 700 Q 330 600 364 560 Q 400 530 452 552 Q 482 570 480 620 L 470 706 Z" fill="#3f8ad6"/>
     <line x1="410" y1="560" x2="404" y2="700" fill="none" stroke-width="6" opacity="0.5"/>
+    </g>
 
     <!-- arm reaching to the wheel -->
-    <path d="M448 580 Q 500 610 548 600" fill="none" stroke="#15291a" stroke-width="54"/>
-    <path d="M448 580 Q 500 610 548 600" fill="none" stroke="#3f8ad6" stroke-width="30"/>
+    <path d="M422 573 Q 494 614 548 600" fill="none" stroke="#15291a" stroke-width="54"/>
+    <path d="M422 573 Q 494 614 548 600" fill="none" stroke="#3f8ad6" stroke-width="30"/>
 
     <!-- steering wheel and hand -->
     <ellipse cx="546" cy="596" rx="58" ry="18" fill="none" stroke="#15291a" stroke-width="26" transform="rotate(-22 546 596)"/>
@@ -91,10 +94,14 @@
     <circle cx="552" cy="600" r="24" fill="#8a5434" stroke-width="10"/>
 
     <!-- neck and head -->
+    <g transform="rotate(-12 400 700)">
     <rect x="392" y="500" width="44" height="60" rx="14" fill="#7a4a2d" stroke-width="10"/>
     <circle cx="414" cy="474" r="66" fill="#8a5434"/>
     <circle cx="352" cy="480" r="16" fill="#8a5434" stroke-width="10"/>
+    </g>
   </g>
+
+  <g transform="rotate(-12 400 700)">
 
   <!-- face -->
   <!-- sunglasses -->
@@ -128,6 +135,7 @@
     <path d="M276 420 Q 300 452 414 452 Q 528 452 556 414 Q 540 470 414 470 Q 290 470 276 420 Z" fill="#d99b55"/>
   </g>
   <path d="M388 362 Q 414 376 440 360" fill="none" stroke="#15291a" stroke-width="7" stroke-linecap="round" opacity="0.6"/>
+  </g>
   </g>
 
   <!-- wheels on the near side -->
