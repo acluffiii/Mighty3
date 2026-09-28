@@ -97,13 +97,28 @@
   </g>
 
   <!-- face -->
-  <g fill="#15291a">
-    <ellipse cx="436" cy="460" rx="9" ry="12"/>
-    <ellipse cx="470" cy="463" rx="8" ry="11"/>
+  <!-- sunglasses -->
+  <g stroke="#15291a" stroke-linejoin="round" stroke-linecap="round">
+    <line x1="412" y1="458" x2="364" y2="472" stroke-width="8"/>
+    <line x1="448" y1="456" x2="462" y2="456" stroke-width="8"/>
+    <path d="M410 448 H 450 V 462 Q 450 478 432 478 H 426 Q 410 478 410 462 Z" fill="#1d2b33" stroke-width="7"/>
+    <path d="M460 448 H 494 V 462 Q 494 478 478 478 H 474 Q 460 478 460 462 Z" fill="#1d2b33" stroke-width="7"/>
+  </g>
+  <g fill="#ffffff" opacity="0.7">
+    <rect x="417" y="453" width="12" height="5" rx="2"/>
+    <rect x="466" y="453" width="11" height="5" rx="2"/>
   </g>
   <path d="M478 470 Q 490 486 474 490" fill="none" stroke="#15291a" stroke-width="7" stroke-linecap="round"/>
   <path d="M424 500 Q 452 530 482 504 Q 454 516 424 500 Z" fill="#ffffff" stroke="#15291a" stroke-width="8" stroke-linejoin="round"/>
   <circle cx="448" cy="486" r="10" fill="#b0664a" opacity="0.5"/>
+  <!-- straw in his mouth -->
+  <path d="M474 506 L 572 478" fill="none" stroke="#15291a" stroke-width="18" stroke-linecap="round"/>
+  <path d="M474 506 L 572 478" fill="none" stroke="#f0cf5a" stroke-width="7" stroke-linecap="round"/>
+  <g stroke="#15291a" stroke-width="5" stroke-linecap="round">
+    <line x1="560" y1="481" x2="574" y2="464"/>
+    <line x1="560" y1="481" x2="580" y2="490"/>
+    <line x1="548" y1="485" x2="558" y2="468"/>
+  </g>
 
   <!-- cowboy hat -->
   <g transform="translate(0 -38)">
