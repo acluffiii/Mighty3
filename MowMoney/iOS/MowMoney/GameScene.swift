@@ -65,7 +65,7 @@ final class GameScene: SKScene {
     let remainNode = SKShapeNode()
     let arrow = SKShapeNode()
 
-    // Touch joystick (children of the camera, sized in screen points)
+    // Corner joystick (children of the camera, sized in screen points). Logic is in Joystick.swift.
     let joyBase = SKShapeNode(circleOfRadius: 60)
     let joyKnob = SKShapeNode(circleOfRadius: 23)
     weak var activeTouch: UITouch?
@@ -128,6 +128,7 @@ final class GameScene: SKScene {
         arrow.path = path
         arrow.lineWidth = 3
         arrow.setScale(camScale)
+        layoutJoystick()
     }
 
     // MARK: - Touch (joystick logic lives in Joystick.swift)
@@ -320,6 +321,7 @@ final class GameScene: SKScene {
             updateCamera(dt)
         }
         syncMower()
+        updateJoystickVisibility(mode)
         clippings.particleBirthRate = lastFresh > 0 && mode != .pause ? 70 : 0
         wideRing.isHidden = !(job?.isActive(.wide) ?? false)
 

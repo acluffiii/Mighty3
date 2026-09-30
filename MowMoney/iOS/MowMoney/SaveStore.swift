@@ -12,6 +12,7 @@ struct SaveData: Codable, Equatable {
     var best: [String: Int] = [:]   // job level -> best stars
     var sqft = 0
     var muted = false
+    var handedness: String?          // "left" or "right"; nil until the player picks
 
     init() {}
 
@@ -28,6 +29,7 @@ struct SaveData: Codable, Equatable {
         best = try c.decodeIfPresent([String: Int].self, forKey: .best) ?? [:]
         sqft = try c.decodeIfPresent(Int.self, forKey: .sqft) ?? 0
         muted = try c.decodeIfPresent(Bool.self, forKey: .muted) ?? false
+        handedness = try c.decodeIfPresent(String.self, forKey: .handedness)
     }
 
     func level(of id: UpgradeID) -> Int {

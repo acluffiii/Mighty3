@@ -153,6 +153,27 @@ final class GameSession: ObservableObject {
         scene.resetDemo()
     }
 
+    // MARK: - Controls
+
+    /// Right-handed until the player says otherwise.
+    var isRightHanded: Bool { save.handedness != "left" }
+
+    /// True on first launch, before the player has picked a hand.
+    var needsHandedness: Bool { save.handedness == nil }
+
+    func setHandedness(rightHanded: Bool) {
+        save.handedness = rightHanded ? "right" : "left"
+        persist()
+        sound.play(.click)
+        haptics.coin()
+        scene.cancelInput()
+        scene.layoutJoystick()
+    }
+
+    func toggleHandedness() {
+        setHandedness(rightHanded: !isRightHanded)
+    }
+
     func toggleMute() {
         save.muted.toggle()
         sound.muted = save.muted

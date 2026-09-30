@@ -1,10 +1,17 @@
 import SpriteKit
 import UIKit
 
-// MARK: - Floating touch joystick
+// MARK: - Corner joystick (bottom right for right-handed players, bottom left for left-handed)
 
 extension GameScene {
     private var stickRadius: CGFloat { 50 }
+
+    private var isRightHanded: Bool { session?.isRightHanded ?? true }
+
+    /// Resting center of the stick in view coordinates (y down), clear of the home bar.
+    var stickCenter: CGPoint {
+        CGPoint(x: isRightHanded ? size.width - 100 : 100, y: size.height - 150)
+    }
 
     func setupJoystick() {
         joyBase.fillColor = UIColor(red: 10 / 255, green: 25 / 255, blue: 8 / 255, alpha: 0.18)
@@ -21,51 +28,68 @@ extension GameScene {
         cam.addChild(joyKnob)
     }
 
+    /// Puts the stick back in its corner. Called on size changes and when handedness changes.
+    func layoutJoystick() {
+        guard size.width > 0, size.height > 0 else { return }
+        joyBase.position = camPoint(stickCenter)
+        if activeTouch == nil { joyKnob.position = joyBase.position }
+    }
+
+    /// Shows the resting stick only while a job is running.
+    func updateJoystickVisibility(_ mode: GameMode) {
+        let visible = mode == .play || mode == .finishing
+        joyBase.isHidden = !visible
+        joyKnob.isHidden = !visible
+        let alpha: CGFloat = activeTouch == nil ? 0.55 : 1
+        joyBase.alpha = alpha
+        joyKnob.alpha = alpha
+    }
+
     /// View point (y down, origin top-left) to camera-local point. Children of the camera are drawn in screen points.
     private func camPoint(_ p: CGPoint) -> CGPoint {
         CGPoint(x: p.x - size.width / 2, y: size.height / 2 - p.y)
     }
 
+    /// Touches only steer when they start in the stick's corner: that half of the screen, lower 55%.
+    private func inStickZone(_ p: CGPoint) -> Bool {
+        let rightHalf = p.x >= size.width / 2
+        return rightHalf == isRightHanded && p.y >= size.height * 0.45
+    }
+
     func handleTouchesBegan(_ touches: Set<UITouch>) {
-        guard session?.mode == .play, activeTouch == nil, let t = touches.first, let v = view else { return }
+        guard session?.mode == .play, activeTouch == nil, let v = view,
+              let t = touches.first(where: { inStickZone($0.location(in: v)) }) else { return }
         activeTouch = t
-        let p = t.location(in: v)
-        touchOrigin = p
-        inputVec = .zero
-        joyBase.position = camPoint(p)
-        joyKnob.position = camPoint(p)
-        joyBase.isHidden = false
-        joyKnob.isHidden = false
+        moveKnob(to: t.location(in: v))
     }
 
     func handleTouchesMoved(_ touches: Set<UITouch>) {
-        guard let t = activeTouch, touches.contains(t), var o = touchOrigin, let v = view else { return }
-        let p = t.location(in: v)
-        var dx = p.x - o.x, dy = p.y - o.y
-        let d = hypot(dx, dy), R = stickRadius
-        if d > R {
-            // Drag the stick along with the finger so you never run out of room.
-            o.x += dx * (1 - R / d)
-            o.y += dy * (1 - R / d)
-            touchOrigin = o
-            dx = p.x - o.x
-            dy = p.y - o.y
-            joyBase.position = camPoint(o)
-        }
-        inputVec = CGVector(dx: dx / R, dy: dy / R)   // y down, same as the simulation
-        joyKnob.position = camPoint(p)
+        guard let t = activeTouch, touches.contains(t), let v = view else { return }
+        moveKnob(to: t.location(in: v))
     }
 
     func handleTouchesEnded(_ touches: Set<UITouch>) {
         if let t = activeTouch, touches.contains(t) { cancelInput() }
     }
 
+    /// The base stays put; the knob follows the finger and stops at the edge of the stick.
+    private func moveKnob(to p: CGPoint) {
+        let c = stickCenter
+        var dx = p.x - c.x, dy = p.y - c.y
+        let d = hypot(dx, dy), R = stickRadius
+        if d > R {
+            dx *= R / d
+            dy *= R / d
+        }
+        inputVec = CGVector(dx: dx / R, dy: dy / R)   // y down, same as the simulation
+        joyKnob.position = camPoint(CGPoint(x: c.x + dx, y: c.y + dy))
+    }
+
     func cancelInput() {
         activeTouch = nil
         touchOrigin = nil
         inputVec = .zero
-        joyBase.isHidden = true
-        joyKnob.isHidden = true
+        joyKnob.position = joyBase.position
     }
 }
 

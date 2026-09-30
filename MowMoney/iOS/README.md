@@ -14,6 +14,8 @@ This is a native iOS version of the Mow Money web game (`../index.html`), built 
 5. **App icon:** in the project navigator, delete Xcode's own `Assets.xcassets` and drag in `MowMoney/iOS/MowMoney/Assets.xcassets` from this repo. Or open **Assets → AppIcon** and drop `AppIcon/AppIcon-1024.png` onto the slot. The source drawing is `AppIcon/icon.svg`.
 6. Pick an iPhone simulator and press **⌘R**.
 
+On first launch the game asks whether you steer with your left or right hand. The joystick sits in the bottom corner on that side, and the minimap moves to the other corner. You can switch it later from the title screen ("Controls") or the Pause menu.
+
 Portrait orientation is locked in code (`AppDelegate` in `MowMoneyApp.swift`), so you don't need to change orientation settings.
 
 If Xcode reports a compile error, paste it into Claude (in Xcode or here). This code was written without access to a Mac, so the first build is its first real compile.

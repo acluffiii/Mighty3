@@ -136,7 +136,11 @@ struct RootView: View {
 
             switch session.mode {
             case .title:
-                TitleView(s: session)
+                if session.needsHandedness {
+                    HandednessView(s: session)
+                } else {
+                    TitleView(s: session)
+                }
             case .play, .finishing:
                 HUDView(s: session)
             case .pause:
@@ -230,15 +234,18 @@ struct TitleView: View {
                 Button("Garage") { s.openGarage() }
                     .buttonStyle(ChunkyButtonStyle())
                     .padding(.top, 4)
-                Text("Drag anywhere to steer.")
+                Text("Steer with the stick in the bottom \(s.isRightHanded ? "right" : "left") corner.")
                     .font(Theme.font(13, .bold))
                     .foregroundColor(Theme.muted)
                     .frame(maxWidth: .infinity)
                     .padding(.top, 4)
-                Button(s.save.muted ? "Sound: off" : "Sound: on") { s.toggleMute() }
-                    .font(Theme.font(13, .heavy))
-                    .foregroundColor(Theme.muted)
-                    .frame(maxWidth: .infinity)
+                HStack(spacing: 18) {
+                    Button(s.isRightHanded ? "Controls: right hand" : "Controls: left hand") { s.toggleHandedness() }
+                    Button(s.save.muted ? "Sound: off" : "Sound: on") { s.toggleMute() }
+                }
+                .font(Theme.font(13, .heavy))
+                .foregroundColor(Theme.muted)
+                .frame(maxWidth: .infinity)
             }
             .padding(22)
             .frame(maxWidth: 430)
@@ -354,8 +361,13 @@ struct HUDView: View {
             Spacer()
 
             HStack {
-                Spacer()
-                MinimapView(image: s.minimap, dot: h.mowerDot)
+                if s.isRightHanded {
+                    MinimapView(image: s.minimap, dot: h.mowerDot)
+                    Spacer()
+                } else {
+                    Spacer()
+                    MinimapView(image: s.minimap, dot: h.mowerDot)
+                }
             }
             .allowsHitTesting(false)
         }
@@ -394,6 +406,53 @@ struct MinimapView: View {
 
 // MARK: - Pause
 
+// MARK: - Handedness (first launch)
+
+struct HandednessView: View {
+    @ObservedObject var s: GameSession
+
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.4).ignoresSafeArea()
+            VStack(alignment: .leading, spacing: 14) {
+                Eyebrow(text: "Before you mow")
+                Text("Which hand do you steer with?")
+                    .font(Theme.font(30))
+                    .foregroundColor(Theme.ink)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text("The joystick goes in the bottom corner on that side. You can change this later.")
+                    .font(Theme.font(15, .bold))
+                    .foregroundColor(Theme.muted)
+                    .fixedSize(horizontal: false, vertical: true)
+                HStack(spacing: 12) {
+                    handButton(right: false)
+                    handButton(right: true)
+                }
+                .padding(.top, 4)
+            }
+            .padding(22)
+            .frame(maxWidth: 430)
+            .chunky()
+            .padding(.horizontal, 16)
+        }
+    }
+
+    private func handButton(right: Bool) -> some View {
+        Button {
+            s.setHandedness(rightHanded: right)
+        } label: {
+            VStack(spacing: 8) {
+                Image(systemName: "hand.raised.fill")
+                    .font(.system(size: 40, weight: .bold))
+                    .scaleEffect(x: right ? 1 : -1, y: 1)
+                Text(right ? "Right hand" : "Left hand")
+            }
+            .padding(.vertical, 6)
+        }
+        .buttonStyle(ChunkyButtonStyle(fill: Theme.sun))
+    }
+}
+
 struct PauseView: View {
     @ObservedObject var s: GameSession
 
@@ -404,6 +463,8 @@ struct PauseView: View {
                 Text("Paused").font(Theme.font(34)).foregroundColor(Theme.ink)
                 Button("Resume") { s.resume() }.buttonStyle(ChunkyButtonStyle(fill: Theme.sun))
                 Button(s.save.muted ? "Sound: off" : "Sound: on") { s.toggleMute() }.buttonStyle(ChunkyButtonStyle())
+                Button(s.isRightHanded ? "Controls: right hand" : "Controls: left hand") { s.toggleHandedness() }
+                    .buttonStyle(ChunkyButtonStyle())
                 Button("Quit job") { s.quitJob() }.buttonStyle(ChunkyButtonStyle())
                 Text("You keep what you've earned on this lawn so far.")
                     .font(Theme.font(13, .bold))
