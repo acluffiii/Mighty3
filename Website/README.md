@@ -127,20 +127,20 @@ These came up while checking the app for this policy. Fix them before you submit
       paid tool and a common reason for 1-star reviews.
 - [ ] Camera-permission text in `Info.plist` is fine. Consider changing it to
       "DentDOG uses the camera to photograph vehicle panels and measure dent size."
-      so it also covers LiDAR measurement.
+      so it also covers dent measurement.
 - [ ] Bundle ID is still `com.cluffwork.haildeck`. Before creating the App Store
       record, decide whether to switch to something like `com.thumbit.dentdog`.
       After the first upload it can't be changed.
-- [ ] Test on a real device through TestFlight, especially the camera, LiDAR, and
-      PDF export, which can't be tested in the Simulator.
+- [ ] Test on a real device through TestFlight, especially the camera, dent measuring,
+      and PDF export, which can't be tested in the Simulator.
 
 ## 4. Store listing assets
 - [ ] App icon 1024×1024 (already have: `Brand-Assets/dentdog_app_icon.png`)
 - [ ] iPhone screenshots: 6.9" (1320×2868) is required; Apple scales it down for
-      smaller devices. 3–5 shots: the deck, a panel card with a price, LiDAR
-      measure, the PDF, and the vehicle map.
+      smaller devices. 3–5 shots: the deck, a panel card with a price, dent
+      measuring, the PDF, and the vehicle map.
 - [ ] Subtitle (30 characters), for example "Hail damage estimates"
-- [ ] Keywords (100 characters), for example `PDR,hail,dent,estimate,paintless,auto body,LiDAR,panel,repair,insurance`
+- [ ] Keywords (100 characters), for example `PDR,hail,dent,estimate,paintless,auto body,panel,repair,insurance`
 - [ ] Description (you can adapt the copy on `dentdog/index.html`)
 
 ## 5. Suggested timeline for a ~1-month launch
