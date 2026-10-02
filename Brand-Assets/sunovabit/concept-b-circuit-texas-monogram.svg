@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 390" role="img" aria-label="Sunovabit circuit Texas monogram concept">
+  <rect width="300" height="390" rx="28" fill="#13213a"/>
+  <g transform="translate(36,24) scale(1.0)">
+    <polygon points="68.4,10.0 116.4,10.0 116.4,45.7 129.2,48.6 140.4,54.2 164.4,59.7 188.4,57.8 204.4,63.4 211.8,64.3 211.8,111.2 218.8,129.6 214.8,135.1 201.2,141.6 188.4,151.7 172.4,160.9 161.2,171.9 158.0,184.8 161.2,203.2 154.8,204.1 143.6,201.4 130.8,194.0 124.4,175.6 111.6,160.9 105.2,146.2 94.0,133.8 78.0,133.3 68.4,148.0 60.4,146.2 44.4,135.1 38.0,118.6 20.4,103.8 10.8,92.8 67.4,92.8" fill="#1c2f52" stroke="#f7f1e6" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M168,72 L118,72 L102,88 L102,100 L116,112 L156,112 L170,126 L170,140 L154,154 L104,154" fill="none" stroke="#e0662b" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="168" cy="72" r="8" fill="#13213a" stroke="#e0662b" stroke-width="4"/>
+    <circle cx="104" cy="154" r="8" fill="#13213a" stroke="#e0662b" stroke-width="4"/>
+    <polygon points="186.0,113.0 188.6,120.4 196.5,120.6 190.2,125.4 192.5,132.9 186.0,128.4 179.5,132.9 181.8,125.4 175.5,120.6 183.4,120.4" fill="#e8b04a"/>
+  </g>
+  <g stroke="#f7f1e6" stroke-width="2.5" fill="none" stroke-linecap="round">
+    <path d="M40,296 Q150,200 260,296" stroke-width="5"/>
+    <line x1="60" y1="280.1" x2="60" y2="296"/><line x1="75" y1="270.3" x2="75" y2="296"/><line x1="90" y1="262.3" x2="90" y2="296"/><line x1="105" y1="256.0" x2="105" y2="296"/><line x1="120" y1="251.6" x2="120" y2="296"/><line x1="135" y1="248.9" x2="135" y2="296"/><line x1="150" y1="248.0" x2="150" y2="296"/><line x1="165" y1="248.9" x2="165" y2="296"/><line x1="180" y1="251.6" x2="180" y2="296"/><line x1="195" y1="256.0" x2="195" y2="296"/><line x1="210" y1="262.3" x2="210" y2="296"/><line x1="225" y1="270.3" x2="225" y2="296"/><line x1="240" y1="280.1" x2="240" y2="296"/>
+    <line x1="28" y1="296" x2="272" y2="296" stroke-width="5"/>
+  </g>
+  <text x="150" y="344" text-anchor="middle" font-family="'Archivo Black','Arial Black',Impact,sans-serif" font-weight="900" font-size="40" fill="#f7f1e6" letter-spacing="2">SUNOVA<tspan font-family="'JetBrains Mono','Courier New',monospace" font-weight="700" fill="#e0662b">bit</tspan></text>
+  <text x="150" y="368" text-anchor="middle" font-family="'JetBrains Mono','Courier New',monospace" font-size="11" fill="#e8b04a" letter-spacing="3">EST. 2026 · TEXAS</text>
+</svg>
