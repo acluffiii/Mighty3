@@ -85,37 +85,39 @@ function worker() {
   s += arm([105, 40], [225, -55], [232, -218], C.shirt, C.skin, C.skinShade, 10, 1);
   // neck
   s += `<path d="M-38 -70 L28 -70 L22 4 Q-6 22 -36 4 Z" fill="${C.skinShade}"/>`;
-  // head, tipped back to look up
-  s += `<g transform="rotate(22 -5 -60)">`;
-  s += `<path d="M-60 -238 Q-10 -262 44 -232 Q72 -200 64 -150 Q60 -110 40 -86 Q18 -54 -22 -48 Q-56 -46 -70 -64 L-76 -92 Q-90 -100 -84 -112 L-92 -124 Q-104 -128 -100 -138 L-84 -170 Q-84 -208 -60 -238 Z" fill="${C.skin}"/>`;
-  s += `<path d="M18 -230 Q72 -200 64 -150 Q60 -110 40 -86 Q18 -54 -22 -48 Q20 -80 22 -130 Q24 -190 18 -230 Z" fill="${C.skinShade}"/>`;
-  s += `<ellipse cx="34" cy="-140" rx="15" ry="24" fill="${C.skinDeep}"/>`;
-  s += `<ellipse cx="-36" cy="-118" rx="24" ry="13" fill="${C.flush}" opacity=".45"/>`;
-  // short beard shadow along the jaw
-  s += `<path d="M-70 -64 Q-56 -46 -22 -48 Q18 -54 40 -86 Q10 -70 -20 -66 Q-50 -64 -70 -64 Z" fill="${C.skinDeep}" opacity=".6"/>`;
-  // nose shadow
-  s += `<path d="M-76 -170 L-98 -134 L-80 -126 Z" fill="${C.skinShade}"/>`;
-  // exasperated brows (inner ends raised)
-  s += `<path d="M-60 -192 L-20 -180 L-22 -172 L-58 -182 Z" fill="${C.hair}"/>`;
-  s += `<path d="M-92 -178 L-70 -192 L-68 -184 L-88 -172 Z" fill="${C.hair}"/>`;
-  // eyes rolled up toward the ceiling
-  s += `<ellipse cx="-40" cy="-160" rx="13" ry="9" fill="${C.tee}"/><circle cx="-44" cy="-165" r="5.5" fill="${C.hair}"/>`;
-  s += `<ellipse cx="-80" cy="-158" rx="7" ry="8" fill="${C.tee}"/><circle cx="-82" cy="-163" r="4" fill="${C.hair}"/>`;
-  s += `<path d="M-54 -146 Q-40 -140 -26 -146" stroke="${C.skinShade}" stroke-width="4" fill="none" stroke-linecap="round"/>`;
-  // mouth open in a groan, mustache on top
-  s += `<path d="M-92 -82 Q-62 -116 -32 -88 Q-38 -68 -62 -70 Q-86 -68 -92 -82 Z" fill="${C.mouth}"/>`;
-  s += `<path d="M-86 -88 Q-62 -110 -38 -92 L-40 -86 Q-62 -102 -84 -82 Z" fill="${C.tee}"/>`;
-  s += `<ellipse cx="-62" cy="-76" rx="13" ry="5" fill="#9b4a44"/>`;
-  s += `<path d="M-100 -118 Q-84 -126 -66 -120 Q-48 -128 -32 -112 Q-50 -106 -66 -110 Q-86 -104 -100 -118 Z" fill="${C.hair}"/>`;
-  // cap
-  s += `<path d="M-84 -196 Q-90 -262 -20 -272 Q50 -276 70 -210 Q72 -186 62 -176 Q-10 -206 -84 -196 Z" fill="${C.cap}"/>`;
-  s += `<path d="M20 -268 Q64 -250 70 -210 Q72 -186 62 -176 Q40 -186 22 -192 Q36 -230 20 -268 Z" fill="${C.capShade}"/>`;
-  s += `<path d="M-74 -200 Q-120 -204 -156 -186 Q-150 -176 -120 -178 Q-96 -184 -70 -186 Z" fill="${C.capShade}"/>`;
-  s += `<circle cx="-14" cy="-272" r="7" fill="${C.capShade}"/>`;
+  // head, turned square to the camera: he's looking right at the player
+  s += `<ellipse cx="-78" cy="-150" rx="14" ry="22" fill="${C.skin}"/><ellipse cx="78" cy="-150" rx="14" ry="22" fill="${C.skinShade}"/>`;
+  s += `<path d="M0 -258 C60 -258 80 -212 78 -160 C76 -110 58 -70 0 -48 C-58 -70 -76 -110 -78 -160 C-80 -212 -60 -258 0 -258 Z" fill="${C.skin}"/>`;
+  s += `<path d="M30 -250 C68 -236 80 -204 78 -160 C76 -110 58 -70 0 -48 C40 -80 52 -120 50 -160 C48 -200 44 -230 30 -250 Z" fill="${C.skinShade}"/>`;
+  s += `<path d="M-58 -94 C-44 -68 -22 -56 0 -53 C22 -56 44 -68 58 -94 C40 -80 20 -76 0 -76 C-20 -76 -40 -80 -58 -94 Z" fill="${C.skinDeep}" opacity=".4"/>`;
+  s += `<ellipse cx="-44" cy="-124" rx="18" ry="10" fill="${C.flush}" opacity=".45"/><ellipse cx="44" cy="-124" rx="18" ry="10" fill="${C.flush}" opacity=".35"/>`;
+  // one brow cocked, one flat: "you seeing this?"
+  s += `<path d="M-56 -188 Q-36 -206 -14 -192" stroke="${C.hair}" stroke-width="10" fill="none" stroke-linecap="round"/>`;
+  s += `<path d="M14 -180 L56 -184" stroke="${C.hair}" stroke-width="10" fill="none" stroke-linecap="round"/>`;
+  // eyes locked on the viewer, lids half down
+  for (const [x, lid] of [[-34, -172], [34, -167]]) {
+    s += `<ellipse cx="${x}" cy="-160" rx="15" ry="11" fill="${C.tee}"/><circle cx="${x}" cy="-158" r="7" fill="${C.hair}"/><circle cx="${x - 2}" cy="-161" r="2" fill="#fff"/>`;
+    s += `<path d="M${x - 17} -160 Q${x} ${lid - 6} ${x + 17} -160 L${x + 17} -174 L${x - 17} -174 Z" fill="${C.skinShade}"/>`;
+    s += `<path d="M${x - 16} ${lid + 2} Q${x} ${lid - 4} ${x + 16} ${lid + 2}" stroke="${C.skinDeep}" stroke-width="3" fill="none"/>`;
+    s += `<path d="M${x - 12} -144 Q${x} -140 ${x + 12} -144" stroke="${C.skinShade}" stroke-width="3.5" fill="none" stroke-linecap="round"/>`;
+  }
+  // nose
+  s += `<path d="M-4 -152 L-14 -114 Q0 -106 16 -114 L8 -150 Z" fill="${C.skinShade}"/>`;
+  s += `<path d="M-12 -112 Q0 -106 14 -112" stroke="${C.skinDeep}" stroke-width="4" fill="none" stroke-linecap="round"/>`;
+  // clenched, downturned grimace under the mustache
+  s += `<path d="M-36 -78 Q0 -96 36 -78 Q32 -62 0 -64 Q-32 -62 -36 -78 Z" fill="${C.mouth}"/>`;
+  s += `<path d="M-32 -78 Q0 -94 32 -78 L30 -70 Q0 -84 -30 -70 Z" fill="${C.tee}"/>`;
+  s += `<path d="M-14 -84 V-74 M0 -87 V-77 M14 -84 V-74" stroke="#cfc4b8" stroke-width="2.5"/>`;
+  s += `<path d="M-42 -96 Q-20 -110 0 -100 Q20 -110 42 -96 Q22 -86 0 -92 Q-22 -86 -42 -96 Z" fill="${C.hair}"/>`;
+  // cap, seen from the front, bill curving down toward the viewer
+  s += `<path d="M-80 -214 Q-84 -290 0 -296 Q84 -290 80 -214 Q0 -232 -80 -214 Z" fill="${C.cap}"/>`;
+  s += `<path d="M20 -294 Q82 -282 80 -214 Q60 -220 40 -224 Q50 -262 20 -294 Z" fill="${C.capShade}"/>`;
+  s += `<path d="M-100 -216 Q0 -250 100 -216 Q108 -196 90 -190 Q0 -220 -90 -190 Q-108 -196 -100 -216 Z" fill="${C.capShade}"/>`;
+  s += `<path d="M-84 -203 Q0 -228 84 -203" stroke="${C.cap}" stroke-width="4" fill="none" opacity=".7"/>`;
+  s += `<circle cx="0" cy="-296" r="8" fill="${C.capShade}"/>`;
   // sweat on the face
-  s += `<path d="M10 -190 Q16 -150 8 -112" stroke="${C.sweatBlue}" stroke-width="7" fill="none" stroke-linecap="round"/>`;
-  s += drop(8, -104, 0.55) + drop(-12, -146, 0.45) + drop(-62, -134, 0.4) + drop(-100, -152, 0.4);
-  s += '</g>';
+  s += `<path d="M62 -192 Q70 -150 62 -118" stroke="${C.sweatBlue}" stroke-width="7" fill="none" stroke-linecap="round"/>`;
+  s += drop(62, -110, 0.55) + drop(-64, -180, 0.42) + drop(-58, -132, 0.4) + drop(0, -180, 0.38);
   // drops flying off
   s += drop(-150, -300, 0.9, -30) + drop(-175, -200, 0.8, -60) + drop(-90, -370, 0.75, -15);
   s += drop(120, -300, 0.9, 30) + drop(140, -200, 0.75, 60) + drop(30, -390, 0.7, 10);
