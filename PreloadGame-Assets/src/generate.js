@@ -11,11 +11,11 @@ const FONT = fs.readFileSync(path.join(__dirname, 'Lexend-Bold.ttf')).toString('
 const C = {
   bg: '#6aaedc', bgDeep: '#5a9fd0', blob: '#a8d1ef', blobSoft: '#8cc2e8',
   navy: '#1f3b4f',
-  skin: '#e8956b', skinShade: '#c9714f', skinDeep: '#a85a3e', flush: '#dd5f4f',
-  hair: '#3b2a22',
-  shirt: '#3e6e68', shirtShade: '#2d5550', shirtLight: '#4f817a', sweatPatch: '#28504b',
-  tee: '#f4ede4', pants: '#2b3140', boot: '#4a3426',
-  cap: '#c75a2e', capShade: '#a04420',
+  skin: '#8a5636', skinShade: '#6c3f25', skinDeep: '#54301c', flush: '#a8473a',
+  hair: '#1b1210', mouth: '#3a1712',
+  shirt: '#6b4a2b', shirtShade: '#553a21', shirtLight: '#7d5935', sweatPatch: '#46301b', button: '#b88a5a',
+  tee: '#f4ede4', pants: '#5a3f25', boot: '#2b1d14',
+  cap: '#6b4a2b', capShade: '#553a21',
   box: '#dfa13b', boxSide: '#b9802a', boxTop: '#ebb757', tape: '#7a5532',
   sweat: '#f2fbff', sweatBlue: '#cdeaff',
   beltTop: '#2f4356', beltStripe: '#3b5268', rail: '#8ea4b7', railLight: '#b5c6d5',
@@ -43,74 +43,86 @@ function box(x, y, w, h, { rot = 0, d = 0.3, tape = true } = {}) {
   return s + '</g>';
 }
 
-// The worker, turned three-quarters to the left, hoisting a box off the belt.
-// Origin = base of the neck.
+// Open hand at the wrist (x, y), fingers splayed toward `angle` (degrees, 0 = up).
+function hand(x, y, angle, color, lineColor, flip = 1) {
+  let s = `<g transform="translate(${x} ${y}) rotate(${angle}) scale(${flip} 1)">`;
+  for (const [fx, fy, len, a] of [[-16, -26, 34, -18], [-5, -30, 40, -6], [7, -30, 38, 6], [17, -25, 30, 18]])
+    s += `<path d="M${fx} ${fy} l${Math.sin(a * Math.PI / 180) * len} ${-Math.cos(a * Math.PI / 180) * len}" stroke="${color}" stroke-width="13" stroke-linecap="round"/>`;
+  s += `<path d="M-20 -8 l-26 -20" stroke="${color}" stroke-width="13" stroke-linecap="round"/>`;
+  s += `<ellipse cx="0" cy="-12" rx="25" ry="27" fill="${color}"/>`;
+  s += `<path d="M-10 -20 Q0 -10 12 -22" stroke="${lineColor}" stroke-width="3.5" fill="none" stroke-linecap="round"/>`;
+  return s + '</g>';
+}
+
+// Arm from shoulder through elbow to wrist: short sleeve, then bare arm, then an open hand.
+function arm([sx, sy], [ex, ey], [wx, wy], shirt, skin, line, handAngle, flip) {
+  const mx = sx + (ex - sx) * 0.55, my = sy + (ey - sy) * 0.55;
+  let s = `<path d="M${mx} ${my} L${ex} ${ey} L${wx} ${wy}" stroke="${skin}" stroke-width="44" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`;
+  s += `<path d="M${sx} ${sy} L${mx} ${my}" stroke="${shirt}" stroke-width="66" stroke-linecap="round" fill="none"/>`;
+  return s + hand(wx, wy, handAngle, skin, line, flip);
+}
+
+// The worker, three-quarters to the left, head thrown back and both hands up in
+// frustration. Origin = base of the neck.
 function worker() {
   let s = '<g>';
   // legs (mostly hidden behind the belt)
   s += `<path d="M-115 360 L110 360 L120 760 L30 760 L5 470 L-20 760 L-110 760 Z" fill="${C.pants}"/>`;
   s += `<path d="M-125 740 h105 v40 h-130 q-5 -40 25 -40 Z M25 740 h105 q25 0 25 40 h-130 Z" fill="${C.boot}"/>`;
-  // far arm (behind the torso), reaching to the far side of the box
-  s += `<path d="M-120 40 Q-190 70 -205 190 L-150 200 Q-140 110 -95 80 Z" fill="${C.shirtShade}"/>`;
-  s += `<path d="M-200 175 Q-235 250 -255 300 L-215 318 Q-190 260 -158 190 Z" fill="${C.skinShade}"/>`;
+  // far arm, behind the torso
+  s += arm([-105, 45], [-240, -45], [-272, -205], C.shirtShade, C.skinShade, C.skinDeep, -14, -1);
   // torso
   s += `<path d="M-128 28 Q-60 -8 0 0 Q70 -6 128 30 Q160 120 140 380 L-120 380 Q-150 200 -128 28 Z" fill="${C.shirt}"/>`;
   s += `<path d="M40 2 Q100 0 128 30 Q160 120 140 380 L60 380 Q90 200 40 2 Z" fill="${C.shirtShade}"/>`;
-  s += `<ellipse cx="96" cy="120" rx="30" ry="50" fill="${C.sweatPatch}"/>`;
+  s += `<ellipse cx="104" cy="96" rx="28" ry="46" fill="${C.sweatPatch}"/>`;
   s += `<ellipse cx="-20" cy="70" rx="46" ry="28" fill="${C.sweatPatch}" opacity=".7"/>`;
+  s += `<path d="M-100 330 L120 330" stroke="${C.shirtShade}" stroke-width="10"/>`;
   // undershirt V, collar, buttons
   s += `<path d="M-40 0 L-8 66 L22 0 Z" fill="${C.tee}"/>`;
   s += `<path d="M-58 -6 L-10 58 L-26 74 L-72 14 Z" fill="${C.shirtLight}"/><path d="M40 -6 L-6 58 L8 72 L56 12 Z" fill="${C.shirtLight}"/>`;
-  s += `<circle cx="-6" cy="96" r="6" fill="${C.skinShade}"/><circle cx="-6" cy="124" r="6" fill="${C.skinShade}"/>`;
+  s += `<circle cx="-6" cy="96" r="6" fill="${C.button}"/><circle cx="-6" cy="124" r="6" fill="${C.button}"/>`;
+  // near arm, in front of the torso
+  s += arm([105, 40], [225, -55], [232, -218], C.shirt, C.skin, C.skinShade, 10, 1);
   // neck
   s += `<path d="M-38 -70 L28 -70 L22 4 Q-6 22 -36 4 Z" fill="${C.skinShade}"/>`;
-  // head
+  // head, tipped back to look up
+  s += `<g transform="rotate(22 -5 -60)">`;
   s += `<path d="M-60 -238 Q-10 -262 44 -232 Q72 -200 64 -150 Q60 -110 40 -86 Q18 -54 -22 -48 Q-56 -46 -70 -64 L-76 -92 Q-90 -100 -84 -112 L-92 -124 Q-104 -128 -100 -138 L-84 -170 Q-84 -208 -60 -238 Z" fill="${C.skin}"/>`;
   s += `<path d="M18 -230 Q72 -200 64 -150 Q60 -110 40 -86 Q18 -54 -22 -48 Q20 -80 22 -130 Q24 -190 18 -230 Z" fill="${C.skinShade}"/>`;
   s += `<ellipse cx="34" cy="-140" rx="15" ry="24" fill="${C.skinDeep}"/>`;
-  s += `<ellipse cx="-36" cy="-118" rx="24" ry="13" fill="${C.flush}" opacity=".55"/>`;
-  s += `<ellipse cx="-30" cy="-200" rx="36" ry="10" fill="${C.flush}" opacity=".3"/>`;
+  s += `<ellipse cx="-36" cy="-118" rx="24" ry="13" fill="${C.flush}" opacity=".45"/>`;
+  // short beard shadow along the jaw
+  s += `<path d="M-70 -64 Q-56 -46 -22 -48 Q18 -54 40 -86 Q10 -70 -20 -66 Q-50 -64 -70 -64 Z" fill="${C.skinDeep}" opacity=".6"/>`;
   // nose shadow
   s += `<path d="M-76 -170 L-98 -134 L-80 -126 Z" fill="${C.skinShade}"/>`;
-  // worried brows (inner ends raised)
-  s += `<path d="M-60 -190 L-20 -178 L-22 -170 L-58 -180 Z" fill="${C.hair}"/>`;
-  s += `<path d="M-92 -176 L-70 -190 L-68 -182 L-88 -170 Z" fill="${C.hair}"/>`;
-  // eyes, darting toward the incoming boxes
-  s += `<ellipse cx="-40" cy="-160" rx="13" ry="9" fill="${C.tee}"/><circle cx="-46" cy="-159" r="5.5" fill="${C.hair}"/>`;
-  s += `<ellipse cx="-80" cy="-158" rx="7" ry="8" fill="${C.tee}"/><circle cx="-83" cy="-157" r="4" fill="${C.hair}"/>`;
+  // exasperated brows (inner ends raised)
+  s += `<path d="M-60 -192 L-20 -180 L-22 -172 L-58 -182 Z" fill="${C.hair}"/>`;
+  s += `<path d="M-92 -178 L-70 -192 L-68 -184 L-88 -172 Z" fill="${C.hair}"/>`;
+  // eyes rolled up toward the ceiling
+  s += `<ellipse cx="-40" cy="-160" rx="13" ry="9" fill="${C.tee}"/><circle cx="-44" cy="-165" r="5.5" fill="${C.hair}"/>`;
+  s += `<ellipse cx="-80" cy="-158" rx="7" ry="8" fill="${C.tee}"/><circle cx="-82" cy="-163" r="4" fill="${C.hair}"/>`;
   s += `<path d="M-54 -146 Q-40 -140 -26 -146" stroke="${C.skinShade}" stroke-width="4" fill="none" stroke-linecap="round"/>`;
-  // grimace: open mouth, clenched teeth, mustache on top
-  s += `<path d="M-92 -98 Q-62 -106 -34 -100 L-38 -80 Q-62 -86 -88 -78 Z" fill="${C.tee}"/>`;
-  s += `<path d="M-90 -88 Q-62 -94 -36 -90" stroke="#6c2a22" stroke-width="4" fill="none"/>`;
-  s += `<path d="M-76 -102 V-80 M-62 -104 V-84 M-48 -102 V-82" stroke="#cfc4b8" stroke-width="2.5"/>`;
-  s += `<path d="M-30 -100 Q-30 -88 -26 -80" stroke="${C.skinShade}" stroke-width="4" fill="none" stroke-linecap="round"/>`;
+  // mouth open in a groan, mustache on top
+  s += `<path d="M-92 -82 Q-62 -116 -32 -88 Q-38 -68 -62 -70 Q-86 -68 -92 -82 Z" fill="${C.mouth}"/>`;
+  s += `<path d="M-86 -88 Q-62 -110 -38 -92 L-40 -86 Q-62 -102 -84 -82 Z" fill="${C.tee}"/>`;
+  s += `<ellipse cx="-62" cy="-76" rx="13" ry="5" fill="#9b4a44"/>`;
   s += `<path d="M-100 -118 Q-84 -126 -66 -120 Q-48 -128 -32 -112 Q-50 -106 -66 -110 Q-86 -104 -100 -118 Z" fill="${C.hair}"/>`;
-  // cap with the bill pointing at the belt
+  // cap
   s += `<path d="M-84 -196 Q-90 -262 -20 -272 Q50 -276 70 -210 Q72 -186 62 -176 Q-10 -206 -84 -196 Z" fill="${C.cap}"/>`;
   s += `<path d="M20 -268 Q64 -250 70 -210 Q72 -186 62 -176 Q40 -186 22 -192 Q36 -230 20 -268 Z" fill="${C.capShade}"/>`;
   s += `<path d="M-74 -200 Q-120 -204 -156 -186 Q-150 -176 -120 -178 Q-96 -184 -70 -186 Z" fill="${C.capShade}"/>`;
   s += `<circle cx="-14" cy="-272" r="7" fill="${C.capShade}"/>`;
-  // sweat: beads, a trickle and drops flying off
+  // sweat on the face
   s += `<path d="M10 -190 Q16 -150 8 -112" stroke="${C.sweatBlue}" stroke-width="7" fill="none" stroke-linecap="round"/>`;
-  s += drop(8, -104, 0.55) + drop(-12, -146, 0.45) + drop(-62, -132, 0.4) + drop(-100, -150, 0.4);
-  s += drop(-150, -250, 1, -30) + drop(-170, -150, 0.85, -65) + drop(-124, -320, 0.8, -15);
-  s += drop(100, -270, 1, 30) + drop(118, -180, 0.8, 60) + drop(40, -326, 0.75, 10);
+  s += drop(8, -104, 0.55) + drop(-12, -146, 0.45) + drop(-62, -134, 0.4) + drop(-100, -152, 0.4);
+  s += '</g>';
+  // drops flying off
+  s += drop(-150, -300, 0.9, -30) + drop(-175, -200, 0.8, -60) + drop(-90, -370, 0.75, -15);
+  s += drop(120, -300, 0.9, 30) + drop(140, -200, 0.75, 60) + drop(30, -390, 0.7, 10);
+  // frustration marks by the hands
+  for (const [x1, y1, x2, y2] of [[-330, -270, -360, -300], [-345, -215, -385, -222], [290, -280, 318, -312], [305, -225, 345, -232]])
+    s += `<path d="M${x1} ${y1} L${x2} ${y2}" stroke="#ffffff" stroke-width="9" stroke-linecap="round" opacity=".75"/>`;
   return s + '</g>';
-}
-
-// Near arm + box drawn in front of the torso, separate so the belt can sit between.
-function workerFront() {
-  let s = '';
-  s += box(-300, 330, 250, 180, { d: 0.28 });
-  // far hand gripping the left edge
-  s += `<rect x="-312" y="208" width="40" height="78" rx="18" fill="${C.skinShade}"/>`;
-  s += `<path d="M-300 230 h22 M-300 248 h22 M-300 266 h22" stroke="${C.skinDeep}" stroke-width="3.5" stroke-linecap="round"/>`;
-  // near arm: sleeve, forearm, hand under the box
-  s += `<path d="M96 30 Q150 50 156 150 Q150 200 120 215 L72 190 Q90 120 70 60 Z" fill="${C.shirt}"/>`;
-  s += `<path d="M120 200 Q104 260 30 296 L-30 310 L-36 280 L16 258 Q70 230 80 190 Z" fill="${C.skin}"/>`;
-  s += `<path d="M-70 334 Q-80 300 -50 284 L4 278 Q20 296 4 318 Q-30 340 -70 334 Z" fill="${C.skin}"/>`;
-  s += `<path d="M-40 300 L-12 296 M-46 314 L-14 310" stroke="${C.skinShade}" stroke-width="4" stroke-linecap="round"/>`;
-  return s;
 }
 
 function conveyor(x0, x1, y, floorY) {
@@ -162,7 +174,7 @@ function homeScreen(withTitle) {
   // worker behind the belt
   s += `<g transform="translate(600 890) scale(1.1)">${worker()}</g>`;
   s += conveyor(-20, W + 20, beltY, floorY + 10);
-  s += `<g transform="translate(600 890) scale(1.1)">${workerFront()}</g>`;
+  s += speed(470, beltY - 18, 140) + box(470, beltY - 6, 210, 150, { rot: -2 });
   // boxes speeding in from the left, more piling up on the right
   s += speed(40, beltY - 18, 120) + box(30, beltY - 6, 150, 120);
   s += speed(250, beltY - 18, 90, 2) + box(240, beltY - 6, 110, 90, { rot: -3 });
@@ -190,10 +202,9 @@ function appIcon() {
   s += `<rect width="${S}" height="${S}" fill="${C.bg}"/>`;
   s += `<circle cx="560" cy="560" r="400" fill="${C.blob}"/>`;
   s += `<circle cx="90" cy="180" r="70" fill="${C.blobSoft}"/><path d="M900 120 L990 60 L990 200 Z" fill="${C.blobSoft}"/>`;
-  s += `<g transform="translate(600 520) scale(1.3)">${worker()}</g>`;
+  s += `<g transform="translate(590 575) scale(1.22)">${worker()}</g>`;
   s += conveyor(-20, S + 20, 900, 1100);
-  s += `<g transform="translate(600 520) scale(1.3)">${workerFront()}</g>`;
-  s += speed(70, 882, 110, 2) + box(40, 894, 130, 100);
+  s += speed(70, 882, 110, 2) + box(40, 894, 130, 100) + box(600, 894, 230, 160, { rot: 2 });
   s += grain(S, S, 0.14);
   return s + '</svg>';
 }
