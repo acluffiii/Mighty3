@@ -1,6 +1,6 @@
 // Generates the Preload game home screen and app icon as SVG + PNG.
-// Style: flat editorial illustration — no outlines, shading by tone, soft blue
-// backdrop with pale blobs, and a film-grain overlay.
+// Style: low-poly 64-bit-console worker over a flat editorial backdrop — soft blue
+// with pale blobs and a film-grain overlay.
 // Usage: NODE_PATH=$(npm root -g) node generate.js   (needs global `playwright`)
 const fs = require('fs');
 const path = require('path');
@@ -43,87 +43,145 @@ function box(x, y, w, h, { rot = 0, d = 0.3, tape = true } = {}) {
   return s + '</g>';
 }
 
-// Open hand at the wrist (x, y), fingers splayed toward `angle` (degrees, 0 = up).
-function hand(x, y, angle, color, lineColor, flip = 1) {
-  let s = `<g transform="translate(${x} ${y}) rotate(${angle}) scale(${flip} 1)">`;
-  for (const [fx, fy, len, a] of [[-16, -26, 34, -18], [-5, -30, 40, -6], [7, -30, 38, 6], [17, -25, 30, 18]])
-    s += `<path d="M${fx} ${fy} l${Math.sin(a * Math.PI / 180) * len} ${-Math.cos(a * Math.PI / 180) * len}" stroke="${color}" stroke-width="13" stroke-linecap="round"/>`;
-  s += `<path d="M-20 -8 l-26 -20" stroke="${color}" stroke-width="13" stroke-linecap="round"/>`;
-  s += `<ellipse cx="0" cy="-12" rx="25" ry="27" fill="${color}"/>`;
-  s += `<path d="M-10 -20 Q0 -10 12 -22" stroke="${lineColor}" stroke-width="3.5" fill="none" stroke-linecap="round"/>`;
+// ---- Low-poly "64-bit console" worker -------------------------------------
+// Built from flat-shaded polygons lit from the upper left, with a low-res pixel
+// face texture softened by a slight blur (like old bilinear texture filtering).
+
+const shade = (hex, f) => {
+  const n = parseInt(hex.slice(1), 16);
+  const c = [n >> 16, (n >> 8) & 255, n & 255].map(v => Math.max(0, Math.min(255, Math.round(f >= 1 ? v + (255 - v) * (f - 1) : v * f))));
+  return '#' + c.map(v => v.toString(16).padStart(2, '0')).join('');
+};
+const poly = (pts, fill) => `<polygon points="${pts.map(p => p.join(',')).join(' ')}" fill="${fill}"/>`;
+
+// A limb segment drawn as a three-faced prism from p1 to p2.
+function prism([x1, y1], [x2, y2], w1, base, w2 = w1) {
+  const len = Math.hypot(x2 - x1, y2 - y1), nx = -(y2 - y1) / len, ny = (x2 - x1) / len;
+  const at = (x, y, w, k) => [x + nx * w * k, y + ny * w * k];
+  const ks = [0.5, 0.17, -0.17, -0.5];
+  // the side whose normal points left/up catches the light
+  const lightFirst = nx + ny * 0.5 < 0;
+  const tones = lightFirst ? [1.22, 1.0, 0.74] : [0.74, 1.0, 1.22];
+  let s = '';
+  for (let i = 0; i < 3; i++)
+    s += poly([at(x1, y1, w1, ks[i]), at(x2, y2, w2, ks[i]), at(x2, y2, w2, ks[i + 1]), at(x1, y1, w1, ks[i + 1])], shade(base, tones[i]));
+  return s;
+}
+
+// Hexagonal joint cap to hide seams between prisms.
+function joint([x, y], r, base) {
+  const p = a => [x + Math.cos(a) * r, y + Math.sin(a) * r];
+  const pts = [0, 1, 2, 3, 4, 5].map(i => p(Math.PI / 6 + i * Math.PI / 3));
+  return poly([pts[2], pts[3], pts[4], [x, y]], shade(base, 1.22)) + poly([pts[4], pts[5], pts[0], [x, y]], shade(base, 1.0)) +
+         poly([pts[0], pts[1], pts[2], [x, y]], shade(base, 0.74));
+}
+
+// Chunky open hand, fingers pointing up in local space.
+function blockHand(x, y, angle, base) {
+  let s = `<g transform="translate(${x} ${y}) rotate(${angle})">`;
+  s += poly([[-26, 4], [-30, -36], [-20, -52], [0, -54], [0, 4]], shade(base, 1.18));
+  s += poly([[0, 4], [0, -54], [20, -52], [30, -36], [26, 4]], shade(base, 0.9));
+  for (const [fx, top] of [[-21, -92], [-8, -100], [5, -98], [18, -88]]) {
+    s += poly([[fx - 6, -50], [fx - 6, top + 6], [fx, top], [fx, -50]], shade(base, 1.15));
+    s += poly([[fx, -50], [fx, top], [fx + 6, top + 6], [fx + 6, -50]], shade(base, 0.82));
+  }
+  s += poly([[-26, -12], [-50, -38], [-44, -48], [-22, -30]], shade(base, 1.05));
+  s += poly([[-22, -30], [-44, -48], [-36, -50], [-18, -38]], shade(base, 0.8));
   return s + '</g>';
 }
 
-// Arm from shoulder through elbow to wrist: short sleeve, then bare arm, then an open hand.
-function arm([sx, sy], [ex, ey], [wx, wy], shirt, skin, line, handAngle, flip) {
-  const mx = sx + (ex - sx) * 0.55, my = sy + (ey - sy) * 0.55;
-  let s = `<path d="M${mx} ${my} L${ex} ${ey} L${wx} ${wy}" stroke="${skin}" stroke-width="44" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`;
-  s += `<path d="M${sx} ${sy} L${mx} ${my}" stroke="${shirt}" stroke-width="66" stroke-linecap="round" fill="none"/>`;
-  return s + hand(wx, wy, handAngle, skin, line, flip);
+// Low-poly sweat drop (a diamond with a lit and a shaded half).
+const polyDrop = (x, y, s = 1, r = 0) =>
+  `<g transform="translate(${x} ${y}) rotate(${r}) scale(${s})">` +
+  poly([[0, -24], [0, 18], [-13, 4]], '#ffffff') + poly([[0, -24], [13, 4], [0, 18]], C.sweatBlue) + '</g>';
+
+// 16 x 14 face texture, 10 px per texel, centered on the face.
+const FACE = [
+  '................',
+  '..bbbb..........',
+  '.b....b..bbbbbb.',
+  '................',
+  '..wwww....wwww..',
+  '..wppw....wppw..',
+  '..ssss....ssss..',
+  '.......nn.......',
+  '.rr...nnnn...rr.',
+  '...mmmmmmmmmm...',
+  '..mmm......mmm..',
+  '.....kkkkkk.....',
+  '....kttttttk....',
+  '...k........k...',
+];
+function faceTexture(x0, y0, px) {
+  const pal = { b: C.hair, w: C.tee, p: C.hair, s: shade(C.skin, 0.78), n: shade(C.skin, 0.72), r: C.flush, m: C.hair, k: C.mouth, t: C.tee };
+  let s = `<g filter="url(#texfilter)">`;
+  FACE.forEach((row, j) => [...row].forEach((ch, i) => {
+    if (pal[ch]) s += `<rect x="${x0 + i * px}" y="${y0 + j * px}" width="${px + 0.5}" height="${px + 0.5}" fill="${pal[ch]}"${ch === 'r' ? ' opacity=".55"' : ''}/>`;
+  }));
+  return s + '</g>';
 }
 
-// The worker, three-quarters to the left, head thrown back and both hands up in
-// frustration. Origin = base of the neck.
+// The worker, facing the player with both hands thrown up. Origin = base of the neck.
 function worker() {
+  const sk = C.skin, sh = C.shirt, pa = C.pants;
   let s = '<g>';
-  // legs (mostly hidden behind the belt)
-  s += `<path d="M-115 360 L110 360 L120 760 L30 760 L5 470 L-20 760 L-110 760 Z" fill="${C.pants}"/>`;
-  s += `<path d="M-125 740 h105 v40 h-130 q-5 -40 25 -40 Z M25 740 h105 q25 0 25 40 h-130 Z" fill="${C.boot}"/>`;
-  // far arm, behind the torso
-  s += arm([-105, 45], [-240, -45], [-272, -205], C.shirtShade, C.skinShade, C.skinDeep, -14, -1);
-  // torso
-  s += `<path d="M-128 28 Q-60 -8 0 0 Q70 -6 128 30 Q160 120 140 380 L-120 380 Q-150 200 -128 28 Z" fill="${C.shirt}"/>`;
-  s += `<path d="M40 2 Q100 0 128 30 Q160 120 140 380 L60 380 Q90 200 40 2 Z" fill="${C.shirtShade}"/>`;
-  s += `<ellipse cx="104" cy="96" rx="28" ry="46" fill="${C.sweatPatch}"/>`;
-  s += `<ellipse cx="-20" cy="70" rx="46" ry="28" fill="${C.sweatPatch}" opacity=".7"/>`;
-  s += `<path d="M-100 330 L120 330" stroke="${C.shirtShade}" stroke-width="10"/>`;
-  // undershirt V, collar, buttons
-  s += `<path d="M-40 0 L-8 66 L22 0 Z" fill="${C.tee}"/>`;
-  s += `<path d="M-58 -6 L-10 58 L-26 74 L-72 14 Z" fill="${C.shirtLight}"/><path d="M40 -6 L-6 58 L8 72 L56 12 Z" fill="${C.shirtLight}"/>`;
-  s += `<circle cx="-6" cy="96" r="6" fill="${C.button}"/><circle cx="-6" cy="124" r="6" fill="${C.button}"/>`;
-  // near arm, in front of the torso
-  s += arm([105, 40], [225, -55], [232, -218], C.shirt, C.skin, C.skinShade, 10, 1);
-  // neck
-  s += `<path d="M-38 -70 L28 -70 L22 4 Q-6 22 -36 4 Z" fill="${C.skinShade}"/>`;
-  // head, turned square to the camera: he's looking right at the player
-  s += `<ellipse cx="-78" cy="-150" rx="14" ry="22" fill="${C.skin}"/><ellipse cx="78" cy="-150" rx="14" ry="22" fill="${C.skinShade}"/>`;
-  s += `<path d="M0 -258 C60 -258 80 -212 78 -160 C76 -110 58 -70 0 -48 C-58 -70 -76 -110 -78 -160 C-80 -212 -60 -258 0 -258 Z" fill="${C.skin}"/>`;
-  s += `<path d="M30 -250 C68 -236 80 -204 78 -160 C76 -110 58 -70 0 -48 C40 -80 52 -120 50 -160 C48 -200 44 -230 30 -250 Z" fill="${C.skinShade}"/>`;
-  s += `<path d="M-58 -94 C-44 -68 -22 -56 0 -53 C22 -56 44 -68 58 -94 C40 -80 20 -76 0 -76 C-20 -76 -40 -80 -58 -94 Z" fill="${C.skinDeep}" opacity=".4"/>`;
-  s += `<ellipse cx="-44" cy="-124" rx="18" ry="10" fill="${C.flush}" opacity=".45"/><ellipse cx="44" cy="-124" rx="18" ry="10" fill="${C.flush}" opacity=".35"/>`;
-  // one brow cocked, one flat: "you seeing this?"
-  s += `<path d="M-56 -188 Q-36 -206 -14 -192" stroke="${C.hair}" stroke-width="10" fill="none" stroke-linecap="round"/>`;
-  s += `<path d="M14 -180 L56 -184" stroke="${C.hair}" stroke-width="10" fill="none" stroke-linecap="round"/>`;
-  // eyes locked on the viewer, lids half down
-  for (const [x, lid] of [[-34, -172], [34, -167]]) {
-    s += `<ellipse cx="${x}" cy="-160" rx="15" ry="11" fill="${C.tee}"/><circle cx="${x}" cy="-158" r="7" fill="${C.hair}"/><circle cx="${x - 2}" cy="-161" r="2" fill="#fff"/>`;
-    s += `<path d="M${x - 17} -160 Q${x} ${lid - 6} ${x + 17} -160 L${x + 17} -174 L${x - 17} -174 Z" fill="${C.skinShade}"/>`;
-    s += `<path d="M${x - 16} ${lid + 2} Q${x} ${lid - 4} ${x + 16} ${lid + 2}" stroke="${C.skinDeep}" stroke-width="3" fill="none"/>`;
-    s += `<path d="M${x - 12} -144 Q${x} -140 ${x + 12} -144" stroke="${C.skinShade}" stroke-width="3.5" fill="none" stroke-linecap="round"/>`;
+  // legs and boots
+  s += prism([-55, 360], [-62, 740], 78, pa, 70) + prism([55, 360], [62, 740], 78, pa, 70);
+  for (const k of [-1, 1]) {
+    const x = k * 62;
+    s += poly([[x - 40, 730], [x + 40, 730], [x + 44, 760], [x - 44, 760]], shade(C.boot, 1.4));
+    s += poly([[x - 44, 760], [x + 44, 760], [x + 50, 784], [x - 56, 784]], shade(C.boot, 1.0));
   }
-  // nose
-  s += `<path d="M-4 -152 L-14 -114 Q0 -106 16 -114 L8 -150 Z" fill="${C.skinShade}"/>`;
-  s += `<path d="M-12 -112 Q0 -106 14 -112" stroke="${C.skinDeep}" stroke-width="4" fill="none" stroke-linecap="round"/>`;
-  // clenched, downturned grimace under the mustache
-  s += `<path d="M-36 -78 Q0 -96 36 -78 Q32 -62 0 -64 Q-32 -62 -36 -78 Z" fill="${C.mouth}"/>`;
-  s += `<path d="M-32 -78 Q0 -94 32 -78 L30 -70 Q0 -84 -30 -70 Z" fill="${C.tee}"/>`;
-  s += `<path d="M-14 -84 V-74 M0 -87 V-77 M14 -84 V-74" stroke="#cfc4b8" stroke-width="2.5"/>`;
-  s += `<path d="M-42 -96 Q-20 -110 0 -100 Q20 -110 42 -96 Q22 -86 0 -92 Q-22 -86 -42 -96 Z" fill="${C.hair}"/>`;
-  // cap, seen from the front, bill curving down toward the viewer
-  s += `<path d="M-80 -214 Q-84 -290 0 -296 Q84 -290 80 -214 Q0 -232 -80 -214 Z" fill="${C.cap}"/>`;
-  s += `<path d="M20 -294 Q82 -282 80 -214 Q60 -220 40 -224 Q50 -262 20 -294 Z" fill="${C.capShade}"/>`;
-  s += `<path d="M-100 -216 Q0 -250 100 -216 Q108 -196 90 -190 Q0 -220 -90 -190 Q-108 -196 -100 -216 Z" fill="${C.capShade}"/>`;
-  s += `<path d="M-84 -203 Q0 -228 84 -203" stroke="${C.cap}" stroke-width="4" fill="none" opacity=".7"/>`;
-  s += `<circle cx="0" cy="-296" r="8" fill="${C.capShade}"/>`;
-  // sweat on the face
-  s += `<path d="M62 -192 Q70 -150 62 -118" stroke="${C.sweatBlue}" stroke-width="7" fill="none" stroke-linecap="round"/>`;
-  s += drop(62, -110, 0.55) + drop(-64, -180, 0.42) + drop(-58, -132, 0.4) + drop(0, -180, 0.38);
-  // drops flying off
-  s += drop(-150, -300, 0.9, -30) + drop(-175, -200, 0.8, -60) + drop(-90, -370, 0.75, -15);
-  s += drop(120, -300, 0.9, 30) + drop(140, -200, 0.75, 60) + drop(30, -390, 0.7, 10);
-  // frustration marks by the hands
+  // arms (behind the torso at the shoulder)
+  const arms = [
+    { sh: [-112, 46], el: [-232, -46], wr: [-262, -196], ang: -14 },
+    { sh: [112, 46], el: [232, -46], wr: [256, -196], ang: 14 },
+  ];
+  for (const a of arms) {
+    const mid = [a.sh[0] + (a.el[0] - a.sh[0]) * 0.55, a.sh[1] + (a.el[1] - a.sh[1]) * 0.55];
+    s += prism(mid, a.el, 46, sk, 42) + joint(a.el, 22, sk) + prism(a.el, a.wr, 42, sk, 36);
+    s += prism(a.sh, mid, 74, sh, 66);
+    s += blockHand(a.wr[0], a.wr[1] + 6, a.ang, sk);
+  }
+  // torso: faceted chest and belly, lit from the left
+  const P = { ls: [-128, 24], rs: [128, 24], ln: [-38, 0], rn: [38, 0], c0: [0, 8], lm: [-134, 200], rm: [134, 200], c1: [0, 200], lw: [-104, 380], rw: [104, 380], c2: [0, 380] };
+  s += poly([P.ls, P.ln, P.c0, P.lm], shade(sh, 1.25)) + poly([P.c0, P.c1, P.lm], shade(sh, 1.08));
+  s += poly([P.lm, P.c1, P.lw], shade(sh, 1.0)) + poly([P.c1, P.c2, P.lw], shade(sh, 0.9));
+  s += poly([P.rs, P.rn, P.c0, P.rm], shade(sh, 0.95)) + poly([P.c0, P.c1, P.rm], shade(sh, 0.82));
+  s += poly([P.rm, P.c1, P.rw], shade(sh, 0.74)) + poly([P.c1, P.c2, P.rw], shade(sh, 0.68));
+  s += poly([[-104, 330], [104, 330], [104, 350], [-104, 350]], shade(sh, 0.6));
+  s += poly([[96, 70], [128, 90], [124, 150], [96, 140]], C.sweatPatch);
+  // collar, undershirt, buttons
+  s += poly([[-30, 0], [30, 0], [0, 56]], C.tee);
+  s += poly([[-52, -6], [-4, 54], [-24, 70], [-66, 14]], shade(sh, 1.4)) + poly([[52, -6], [4, 54], [24, 70], [66, 14]], shade(sh, 1.1));
+  s += poly([[-6, 88], [6, 88], [6, 100], [-6, 100]], C.button) + poly([[-6, 120], [6, 120], [6, 132], [-6, 132]], C.button);
+  // neck
+  s += prism([0, -70], [0, 8], 58, sk);
+  // head: chamfered block, faceted
+  const H = { a: [-58, -272], b: [58, -272], m1: [0, -276], c: [-84, -230], d: [84, -230], e: [-86, -150], f: [86, -150], m2: [0, -150], g: [-62, -80], h: [62, -80], i: [-24, -50], j: [24, -50] };
+  s += poly([[-84, -170], [-102, -160], [-100, -126], [-84, -120]], shade(sk, 1.1)) + poly([[84, -170], [102, -160], [100, -126], [84, -120]], shade(sk, 0.7));
+  s += poly([H.a, H.m1, H.m2, H.e, H.c], shade(sk, 1.2)) + poly([H.b, H.m1, H.m2, H.f, H.d], shade(sk, 0.95));
+  s += poly([H.e, H.m2, [0, -52], H.i, H.g], shade(sk, 1.06)) + poly([H.f, H.m2, [0, -52], H.j, H.h], shade(sk, 0.8));
+  s += poly([H.g, H.i, [-14, -44], [-50, -70]], shade(sk, 0.85)) + poly([H.h, H.j, [14, -44], [50, -70]], shade(sk, 0.62));
+  s += poly([H.i, H.j, [14, -44], [-14, -44]], shade(sk, 0.72));
+  // face texture, then a faceted nose on top
+  s += faceTexture(-80, -212, 10);
+  s += poly([[0, -152], [-14, -128], [0, -122]], shade(sk, 1.15)) + poly([[0, -152], [0, -122], [14, -128]], shade(sk, 0.75));
+  // cap: faceted dome, bill and button
+  s += poly([[-84, -224], [-70, -282], [-30, -302], [0, -304], [0, -226]], shade(C.cap, 1.25));
+  s += poly([[84, -224], [70, -282], [30, -302], [0, -304], [0, -226]], shade(C.cap, 0.9));
+  s += poly([[-30, -302], [0, -304], [30, -302], [0, -290]], shade(C.cap, 1.45));
+  s += poly([[-104, -230], [0, -246], [0, -214], [-96, -206]], shade(C.cap, 1.1)) + poly([[104, -230], [0, -246], [0, -214], [96, -206]], shade(C.cap, 0.85));
+  s += poly([[-96, -206], [0, -214], [96, -206], [86, -198], [-86, -198]], shade(C.cap, 0.55));
+  s += poly([[-8, -304], [8, -304], [8, -316], [-8, -316]], shade(C.cap, 0.75)) + poly([[-8, -316], [8, -316], [4, -320], [-4, -320]], shade(C.cap, 1.3));
+  // sweat: a blocky trickle and drops
+  s += poly([[60, -196], [68, -196], [70, -126], [62, -126]], C.sweatBlue);
+  s += polyDrop(66, -116, 0.5) + polyDrop(-64, -186, 0.4) + polyDrop(-58, -132, 0.38) + polyDrop(4, -200, 0.36);
+  s += polyDrop(-150, -300, 0.9, -30) + polyDrop(-175, -200, 0.8, -60) + polyDrop(-90, -370, 0.75, -15);
+  s += polyDrop(120, -300, 0.9, 30) + polyDrop(140, -200, 0.75, 60) + polyDrop(30, -390, 0.7, 10);
+  // frustration marks
   for (const [x1, y1, x2, y2] of [[-330, -270, -360, -300], [-345, -215, -385, -222], [290, -280, 318, -312], [305, -225, 345, -232]])
-    s += `<path d="M${x1} ${y1} L${x2} ${y2}" stroke="#ffffff" stroke-width="9" stroke-linecap="round" opacity=".75"/>`;
+    s += `<path d="M${x1} ${y1} L${x2} ${y2}" stroke="#ffffff" stroke-width="9" stroke-linecap="square" opacity=".75"/>`;
   return s + '</g>';
 }
 
@@ -149,6 +207,7 @@ const speed = (x, y, h, n = 3, color = '#ffffff') => {
 
 const defs = (withFont) => `<defs>
   ${withFont ? `<style>@font-face{font-family:Lexend;font-weight:700;src:url(data:font/ttf;base64,${FONT})}</style>` : ''}
+  <filter id="texfilter"><feGaussianBlur stdDeviation=".9"/></filter>
   <filter id="grain" x="0" y="0" width="100%" height="100%">
     <feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="3" seed="7" stitchTiles="stitch"/>
     <feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.6 1.25"/>

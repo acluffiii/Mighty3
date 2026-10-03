@@ -15,4 +15,4 @@ cd src && NODE_PATH=$(npm root -g) node generate.js
 
 This needs `playwright` installed globally. Title font: Lexend Bold (SIL Open Font License), in `src/Lexend-Bold.ttf`.
 
-Art style: flat editorial illustration with no outlines, tonal shading, a soft blue backdrop with pale shapes, and a film-grain overlay.
+Art style: a low-poly, flat-shaded "64-bit console" character (with a blurred pixel face texture) set against a flat editorial backdrop with a film-grain overlay.
