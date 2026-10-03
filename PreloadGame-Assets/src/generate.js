@@ -132,19 +132,8 @@ function worker() {
     s += poly([[x - 40, 730], [x + 40, 730], [x + 44, 760], [x - 44, 760]], shade(C.boot, 1.4));
     s += poly([[x - 44, 760], [x + 44, 760], [x + 50, 784], [x - 56, 784]], shade(C.boot, 1.0));
   }
-  // arms (behind the torso at the shoulder)
-  const arms = [
-    { sh: [-112, 46], el: [-232, -46], wr: [-262, -196], ang: -14 },
-    { sh: [112, 46], el: [232, -46], wr: [256, -196], ang: 14 },
-  ];
-  for (const a of arms) {
-    const mid = [a.sh[0] + (a.el[0] - a.sh[0]) * 0.55, a.sh[1] + (a.el[1] - a.sh[1]) * 0.55];
-    s += prism(mid, a.el, 46, sk, 42) + joint(a.el, 22, sk) + prism(a.el, a.wr, 42, sk, 36);
-    s += prism(a.sh, mid, 74, sh, 66);
-    s += blockHand(a.wr[0], a.wr[1] + 6, a.ang, sk);
-  }
   // torso: faceted chest and belly, lit from the left
-  const P = { ls: [-128, 24], rs: [128, 24], ln: [-38, 0], rn: [38, 0], c0: [0, 8], lm: [-134, 200], rm: [134, 200], c1: [0, 200], lw: [-104, 380], rw: [104, 380], c2: [0, 380] };
+  const P = { ls: [-132, -6], rs: [132, -6], ln: [-38, -10], rn: [38, -10], c0: [0, 8], lm: [-134, 200], rm: [134, 200], c1: [0, 200], lw: [-104, 380], rw: [104, 380], c2: [0, 380] };
   s += poly([P.ls, P.ln, P.c0, P.lm], shade(sh, 1.25)) + poly([P.c0, P.c1, P.lm], shade(sh, 1.08));
   s += poly([P.lm, P.c1, P.lw], shade(sh, 1.0)) + poly([P.c1, P.c2, P.lw], shade(sh, 0.9));
   s += poly([P.rs, P.rn, P.c0, P.rm], shade(sh, 0.95)) + poly([P.c0, P.c1, P.rm], shade(sh, 0.82));
@@ -155,6 +144,17 @@ function worker() {
   s += poly([[-30, 0], [30, 0], [0, 56]], C.tee);
   s += poly([[-52, -6], [-4, 54], [-24, 70], [-66, 14]], shade(sh, 1.4)) + poly([[52, -6], [4, 54], [24, 70], [66, 14]], shade(sh, 1.1));
   s += poly([[-6, 88], [6, 88], [6, 100], [-6, 100]], C.button) + poly([[-6, 120], [6, 120], [6, 132], [-6, 132]], C.button);
+  // shrug: shoulders hiked up, elbows bent at his sides, palms out like 🤷
+  const arms = [
+    { sh: [-118, 18], el: [-180, 168], wr: [-284, 96], ang: -62 },
+    { sh: [118, 18], el: [180, 168], wr: [284, 96], ang: 62 },
+  ];
+  for (const a of arms) {
+    const mid = [a.sh[0] + (a.el[0] - a.sh[0]) * 0.55, a.sh[1] + (a.el[1] - a.sh[1]) * 0.55];
+    s += prism(mid, a.el, 46, sk, 42) + joint(a.el, 23, sk) + prism(a.el, a.wr, 42, sk, 36);
+    s += prism(a.sh, mid, 76, sh, 66) + joint(a.sh, 38, sh);
+    s += blockHand(a.wr[0], a.wr[1], a.ang, sk);
+  }
   // neck
   s += prism([0, -70], [0, 8], 58, sk);
   // head: chamfered block, faceted
@@ -180,7 +180,7 @@ function worker() {
   s += polyDrop(-150, -300, 0.9, -30) + polyDrop(-175, -200, 0.8, -60) + polyDrop(-90, -370, 0.75, -15);
   s += polyDrop(120, -300, 0.9, 30) + polyDrop(140, -200, 0.75, 60) + polyDrop(30, -390, 0.7, 10);
   // frustration marks
-  for (const [x1, y1, x2, y2] of [[-330, -270, -360, -300], [-345, -215, -385, -222], [290, -280, 318, -312], [305, -225, 345, -232]])
+  for (const [x1, y1, x2, y2] of [[-350, -10, -380, -40], [-375, 50, -415, 46], [350, -10, 380, -40], [375, 50, 415, 46]])
     s += `<path d="M${x1} ${y1} L${x2} ${y2}" stroke="#ffffff" stroke-width="9" stroke-linecap="square" opacity=".75"/>`;
   return s + '</g>';
 }
@@ -263,9 +263,9 @@ function appIcon() {
   s += `<rect width="${S}" height="${S}" fill="${C.bg}"/>`;
   s += `<circle cx="560" cy="560" r="400" fill="${C.blob}"/>`;
   s += `<circle cx="90" cy="180" r="70" fill="${C.blobSoft}"/><path d="M900 120 L990 60 L990 200 Z" fill="${C.blobSoft}"/>`;
-  s += `<g transform="translate(590 575) scale(1.22)">${worker()}</g>`;
+  s += `<g transform="translate(512 600) scale(1.05)">${worker()}</g>`;
   s += conveyor(-20, S + 20, 900, 1100);
-  s += speed(70, 882, 110, 2) + box(40, 894, 130, 100) + box(600, 894, 230, 160, { rot: 2 });
+  s += speed(70, 882, 110, 2) + box(40, 894, 130, 100) + box(640, 894, 170, 105, { rot: 2 });
   s += grain(S, S, 0.14);
   return s + '</svg>';
 }
