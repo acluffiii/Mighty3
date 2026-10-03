@@ -13,4 +13,6 @@ All art is vector. To change it (colors, title text, layout), edit `src/generate
 cd src && NODE_PATH=$(npm root -g) node generate.js
 ```
 
-This needs `playwright` installed globally. Title font: Bungee (SIL Open Font License), in `src/Bungee-Regular.ttf`.
+This needs `playwright` installed globally. Title font: Lexend Bold (SIL Open Font License), in `src/Lexend-Bold.ttf`.
+
+Art style: flat editorial illustration with no outlines, tonal shading, a soft blue backdrop with pale shapes, and a film-grain overlay.
