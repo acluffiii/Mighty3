@@ -43,7 +43,7 @@ assets/img/             Logos and app icons
    - On Cloudflare, set these records to **DNS only** (grey cloud) until GitHub has issued your certificate.
 3. Rename `CNAME.example` to `CNAME` (it contains `sunovabit.com`) and push it.
 4. In **Settings → Pages**, enter `sunovabit.com` as the custom domain, wait for the DNS check, then tick **Enforce HTTPS**.
-5. Update the URLs in App Store Connect. Optional: set up free Cloudflare **Email Routing** so `support@sunovabit.com` forwards to your iCloud, then replace the email address in the pages.
+5. Update the URLs in App Store Connect, and search and replace `https://sunovabit.github.io/assets/img/og-image.png` with `https://sunovabit.com/assets/img/og-image.png` (this is the image link previews use). Optional: set up free Cloudflare **Email Routing** so `support@sunovabit.com` forwards to your iCloud, then replace the email address in the pages.
 
 ## Editing
 

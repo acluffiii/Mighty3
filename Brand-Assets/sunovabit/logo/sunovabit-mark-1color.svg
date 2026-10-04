@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="Sunovabit one-color mark">
+  <defs><mask id="m"><rect width="240" height="240" fill="#fff"/><polygon points="120.0,74.0 130.6,105.4 163.7,105.8 137.1,125.6 147.0,157.2 120.0,138.0 93.0,157.2 102.9,125.6 76.3,105.8 109.4,105.4" fill="#000"/></mask></defs>
+  <g fill="none" stroke="#13213a" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="120" cy="120" r="113" stroke-width="5"/>
+    <line x1="137.1" y1="56.2" x2="145.4" y2="25.3" stroke-width="4"/><line x1="183.8" y1="102.9" x2="214.7" y2="94.6" stroke-width="4"/><line x1="166.7" y1="166.7" x2="189.3" y2="189.3" stroke-width="4"/><line x1="102.9" y1="183.8" x2="94.6" y2="214.7" stroke-width="4"/><line x1="56.2" y1="137.1" x2="25.3" y2="145.4" stroke-width="4"/><line x1="73.3" y1="73.3" x2="50.7" y2="50.7" stroke-width="4"/>
+    <polygon points="120.0,28.0 137.1,56.2 166.0,40.3 166.7,73.3 199.7,74.0 183.8,102.9 212.0,120.0 183.8,137.1 199.7,166.0 166.7,166.7 166.0,199.7 137.1,183.8 120.0,212.0 102.9,183.8 74.0,199.7 73.3,166.7 40.3,166.0 56.2,137.1 28.0,120.0 56.2,102.9 40.3,74.0 73.3,73.3 74.0,40.3 102.9,56.2" stroke-width="5"/>
+  </g>
+  <circle cx="145.4" cy="25.3" r="5" fill="#13213a"/><circle cx="214.7" cy="94.6" r="5" fill="#13213a"/><circle cx="189.3" cy="189.3" r="5" fill="#13213a"/><circle cx="94.6" cy="214.7" r="5" fill="#13213a"/><circle cx="25.3" cy="145.4" r="5" fill="#13213a"/><circle cx="50.7" cy="50.7" r="5" fill="#13213a"/>
+  <circle cx="120" cy="120" r="58" fill="#13213a" mask="url(#m)"/>
+</svg>

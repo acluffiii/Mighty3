@@ -28,7 +28,7 @@ Startup costs are deliberately tiny (see §9). The founder writes the code, host
 3. **Open doors.** We honor the civil rights movement's legacy by building tools that make opportunity easier to reach, and by mentoring and hiring locally as we grow.
 4. **Stay curious.** We're still the kid taking the computer apart to see how it works.
 
-**Brand.** The Lone Star (Texas), the Juneteenth nova (Galveston, 1865), and circuit traces (technology). The palette is navy, Texas sunset orange, Juneteenth red, and gold. Tagline: *Built with Grit. Coded with Purpose.* Concepts are in `Brand-Assets/sunovabit/`.
+**Brand.** The Lone Star (Texas), the Juneteenth nova (Galveston, 1865), and circuit traces (technology). The palette is navy, Texas sunset orange, Juneteenth red, and gold. Tagline: *Built with Grit. Coded with Purpose.* **Official mark: Concept A, "Juneteenth Nova".** Logos are in `Brand-Assets/sunovabit/logo/`, the App Store icon is in `Brand-Assets/sunovabit/app-icon/`, and the original concepts are in `Brand-Assets/sunovabit/concepts.html`.
 
 ## 3. Products
 
