@@ -113,8 +113,8 @@ Apple takes **15%** of App Store revenue if you join the App Store Small Busines
 ## 8. Technology
 
 - **Apps:** Swift and SwiftUI. DentDOG uses ARKit (LiDAR), AVFoundation, and on-device image processing; builds run through XcodeGen and Codemagic CI. Mow Money is likely SpriteKit, or Unity/Godot if it needs 3D landmarks.
-- **Website:** static HTML and CSS on **GitHub Pages**: free, with free HTTPS and custom-domain support.
-- **Email:** iCloud for now; later, Cloudflare Email Routing forwards support@sunovabit.com for free.
+- **Website:** static HTML and CSS. It runs on **Bluehost** (paid; includes the first-year domain, SSL and support@sunovabit.com email) or **GitHub Pages** (free). Upload instructions for both are in `site/README.md`.
+- **Email:** iCloud for now; later, support@sunovabit.com through Bluehost email, or through Cloudflare Email Routing (free) if the site is on GitHub Pages.
 - **Privacy by design:** data stays on the device, with no third-party tracking by default.
 
 ## 9. Startup budget (year 1)
@@ -122,14 +122,14 @@ Apple takes **15%** of App Store revenue if you join the App Store Small Busines
 | Item | Cost |
 |---|---|
 | Apple Developer Program | $99 / year |
-| Domain (sunovabit.com) | ~$11 / year |
-| Website hosting (GitHub Pages) | $0 |
+| Website hosting: **Bluehost** Basic (includes domain for year 1, SSL, email) | ~$36–$156 / year at intro pricing; renews higher |
+| *or* GitHub Pages (free) + domain at Cloudflare | $0 + ~$11 / year |
 | Texas LLC filing | $300 (one-time) |
 | EIN, D-U-N-S | $0 |
 | Codemagic CI | $0 on the free tier (500 build minutes a month) |
 | Logo refinement (optional freelancer) | $0–$300 |
 | Marketing (boosted posts, stickers, shirts) | $100–$500 |
-| **Total** | **≈ $510 – $1,510** |
+| **Total** | **≈ $510 – $1,355** (low end assumes GitHub Pages) |
 
 Also budget for Texas franchise tax reports. Most small LLCs owe no tax, but the annual report must still be filed.
 
@@ -137,7 +137,7 @@ Also budget for Texas franchise tax reports. Most small LLCs owe no tax, but the
 
 | When | Milestone |
 |---|---|
-| Month 1 | Site live on GitHub Pages; domain bought; LLC, EIN, and D-U-N-S filed; logo picked |
+| Month 1 | Site live (Bluehost or GitHub Pages); domain bought; LLC, EIN, and D-U-N-S filed; logo picked |
 | Month 2 | DentDOG on TestFlight with 5–10 real PDR techs; fix bugs found in the field |
 | Month 3 | **DentDOG launches on the App Store** with subscriptions |
 | Months 3–6 | Mow Money prototype; start posting clips; grow the launch list |
