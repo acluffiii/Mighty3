@@ -6,6 +6,7 @@ Plain static HTML and CSS: no build step, no framework, no database. Open any `.
 index.html              Company home (apps, custom solutions, our roots, contact)
 dentdog/                DentDOG PDR: product page, support.html, privacy.html
 mowmoney/               Mow Money: product page, support.html, privacy.html
+preload/                Preload: product page, support/, privacy/, terms/ (folder-style URLs)
 privacy.html            Website privacy policy
 404.html                "Well, that's a sunovabit." page
 assets/css/site.css     All styles (light and dark mode)
@@ -21,6 +22,7 @@ sunovabit-site.zip      Ready-to-upload bundle for Bluehost
 |---|---|---|---|
 | DentDOG PDR | `https://<your-site>/dentdog/support.html` | `https://<your-site>/dentdog/privacy.html` | `https://<your-site>/dentdog/` |
 | Mow Money | `https://<your-site>/mowmoney/support.html` | `https://<your-site>/mowmoney/privacy.html` | `https://<your-site>/mowmoney/` |
+| Preload | `https://<your-site>/preload/support/` | `https://<your-site>/preload/privacy/` | `https://<your-site>/preload/` |
 
 `<your-site>` is `sunovabit.com` on Bluehost. With GitHub Pages, it's `sunovabit.github.io` until you connect the domain.
 

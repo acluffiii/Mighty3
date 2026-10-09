@@ -43,7 +43,7 @@ body {
   font: 17px/1.65 var(--font-body);
   -webkit-font-smoothing: antialiased;
 }
-img, svg { max-width: 100%; display: block; }
+img, svg { max-width: 100%; height: auto; display: block; }
 a { color: var(--accent-ink); text-underline-offset: 3px; }
 h1, h2, h3 { font-family: var(--font-head); line-height: 1.12; margin: 0 0 .5em; letter-spacing: .01em; }
 h1 { font-size: clamp(2.1rem, 5.5vw, 3.6rem); }
@@ -67,7 +67,7 @@ p { margin: 0 0 1em; }
 .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); font-family: var(--font-head); font-size: 1.25rem; letter-spacing: .03em; }
 .brand img { width: 38px; height: 38px; }
 .nav { display: flex; gap: 22px; }
-.nav a { color: var(--text); text-decoration: none; font-weight: 600; font-size: .95rem; }
+.nav a { color: var(--text); text-decoration: none; font-weight: 600; font-size: .95rem; white-space: nowrap; }
 .nav a:hover, .nav a[aria-current="page"] { color: var(--accent-ink); }
 .menu { display: none; position: relative; }
 .menu summary { list-style: none; cursor: pointer; font-weight: 700; padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; }
@@ -75,7 +75,7 @@ p { margin: 0 0 1em; }
 .menu .menu-panel { position: absolute; right: 0; top: 46px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 8px; min-width: 200px; box-shadow: 0 12px 30px rgba(0,0,0,.15); }
 .menu .menu-panel a { display: block; padding: 10px 12px; color: var(--text); text-decoration: none; border-radius: 8px; }
 .menu .menu-panel a:hover { background: var(--surface-2); }
-@media (max-width: 760px) { .nav { display: none; } .menu { display: block; } }
+@media (max-width: 960px) { .nav { display: none; } .menu { display: block; } }
 
 /* Buttons */
 .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 999px; font-weight: 700; text-decoration: none; border: 2px solid transparent; }
@@ -153,3 +153,8 @@ details.faq[open] summary { margin-bottom: 8px; }
 .site-footer li { margin-bottom: 6px; }
 .site-footer a { color: var(--muted); text-decoration: none; }
 .site-footer a:hover { color: var(--accent-ink); }
+
+/* Preload */
+.preload-hero { background: linear-gradient(180deg, #4f8fc8, #2f6aa3); }
+.preload-hero h1 span { color: #ffc65a; }
+.phone-art { width: min(280px, 72%); margin: 0 auto; border-radius: 28px; border: 6px solid #10233d; box-shadow: 0 24px 60px rgba(0,0,0,.4); }
