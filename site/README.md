@@ -6,6 +6,7 @@ Plain static HTML and CSS: no build step, no framework, no database. Open any `.
 index.html              Company home (apps, custom solutions, our roots, contact)
 dentdog/                DentDOG PDR: product page, support.html, privacy.html
 mowmoney/               Mow Money: product page, support.html, privacy.html
+contact/                Contact form (index.html), thank-you page, and send.php, which emails messages to you
 preload/                Preload: product page, support/, privacy/, terms/ (folder-style URLs)
 privacy.html            Website privacy policy
 404.html                "Well, that's a sunovabit." page
@@ -39,8 +40,8 @@ Bluehost's intro price for the Basic plan is a few dollars a month, paid 12–36
    4. Back in File Manager, right-click the zip → **Extract** → extract into `/public_html`. Then delete the zip.
    5. Check: `public_html` should now hold `index.html`, `404.html`, `privacy.html`, and the folders `assets`, `dentdog` and `mowmoney`. The `.htaccess` file is hidden; to see it, click **Settings** (top right) → tick **Show Hidden Files**.
 4. **Turn on SSL:** dashboard → **Security** (or **Websites → Security**) → turn on the free **SSL certificate**. It can take a few minutes to a few hours to activate. Once it's on, `.htaccess` sends every visitor to `https://sunovabit.com`.
-5. **Set up email:** dashboard → **Email** → create `support@sunovabit.com`. You can forward it to your iCloud so everything lands in one inbox. Then ask Claude, or use search and replace, to swap `acluffiii@icloud.com` for `support@sunovabit.com` in every page, and re-upload.
-6. **Test:** open `https://sunovabit.com`, `https://sunovabit.com/dentdog/`, and `https://sunovabit.com/nope` (you should see the "Well, that's a sunovabit." page). Then paste the URLs above into App Store Connect.
+5. **Test the contact form:** open `https://sunovabit.com/contact/`, send yourself a test message, and check your iCloud inbox. If it's not there within a few minutes, check **Junk**. Mark it *Not Junk* once and later messages will land in your inbox.
+6. **Test the pages:** open `https://sunovabit.com`, `https://sunovabit.com/dentdog/`, and `https://sunovabit.com/nope` (you should see the "Well, that's a sunovabit." page). Then paste the URLs above into App Store Connect.
 
 **Updating the site later:** edit the files, run `bash site/build-zip.sh`, and upload and extract the new zip over the old files. Or upload just the files you changed through File Manager.
 
@@ -50,7 +51,7 @@ Bluehost's intro price for the Basic plan is a few dollars a month, paid 12–36
 
 1. **Create a free GitHub organization** named `sunovabit` (github.com → your avatar → *Your organizations* → *New organization* → Free plan). That makes the free URL `https://sunovabit.github.io` instead of one with your personal username in it.
 2. **Create a public repository** in that org named exactly `sunovabit.github.io`.
-3. **Upload the contents of this `site/` folder**: the files themselves, not the folder. (`.htaccess` and the zip are only for Bluehost; they're harmless here.) Use *Add file → Upload files*, or git:
+3. **Upload the contents of this `site/` folder**: the files themselves, not the folder. (`.htaccess` and the zip are only for Bluehost; they're harmless here.) **Note:** GitHub Pages can't run PHP, so the contact form won't send messages there. It only works on Bluehost or another host with PHP. Use *Add file → Upload files*, or git:
    ```bash
    git clone https://github.com/sunovabit/sunovabit.github.io.git
    cp -R site/* sunovabit.github.io/
@@ -68,10 +69,20 @@ Bluehost's intro price for the Basic plan is a few dollars a month, paid 12–36
    - On Cloudflare, set these records to **DNS only** (grey cloud) until GitHub has issued your certificate.
 3. Rename `CNAME.example` to `CNAME` (it contains `sunovabit.com`) and push it.
 4. In **Settings → Pages**, enter `sunovabit.com` as the custom domain, wait for the DNS check, then tick **Enforce HTTPS**.
-5. Update the URLs in App Store Connect. Optional: set up free Cloudflare **Email Routing** so `support@sunovabit.com` forwards to your iCloud, then replace the email address in the pages.
+5. Update the URLs in App Store Connect.
+
+## Contact form
+
+The site never shows an email address. Every "contact" or "support" button goes to the form at `/contact/`. The form sends to `contact/send.php`, which emails the message to you. Your address appears **only** in `send.php`, which runs on the server and is never shown to visitors.
+
+- **Where messages go:** `TO_EMAIL` near the top of `contact/send.php` (currently `acluffiii@icloud.com`). To change it, edit that one line and re-upload just `send.php`.
+- **What you receive:** an email titled like `[Sunovabit] Preload: Jane Doe` with the visitor's name, email, topic, device, and message. **Hit Reply** to answer them directly; your reply goes to their address.
+- **Spam protection:** a hidden trap field that bots fill in (their messages are silently dropped), at most 5 messages per hour from one visitor, and messages with more than 3 links are refused. No CAPTCHA puzzles.
+- **Sender address:** messages come from `no-reply@sunovabit.com` (`FROM_EMAIL`). It doesn't need to be a real mailbox, but it must use your own domain, or iCloud may reject the message. If messages ever stop arriving, create a real `no-reply@sunovabit.com` mailbox in Bluehost → Email; that usually fixes delivery.
+- **Topics:** the dropdown choices are listed in both `contact/index.html` and `send.php`. Links like `/contact/?topic=preload` pre-select a topic.
 
 ## Editing
 
-Every page uses the same header and footer, so a change to the menu has to be made in each `.html` file. Search and replace works well for that. Link previews (when someone shares the site in a text or on social media) use `https://sunovabit.com/assets/img/og-image.png`; if the site lives at a different address, search and replace that address too. The support email appears as `acluffiii@icloud.com`; search and replace it when you switch to `support@sunovabit.com`.
+Every page uses the same header and footer, so a change to the menu has to be made in each `.html` file. Search and replace works well for that. Link previews (when someone shares the site in a text or on social media) use `https://sunovabit.com/assets/img/og-image.png`; if the site lives at a different address, search and replace that address too.
 
 > The privacy policies are written plainly and match how the apps work today (no accounts, no ads, no tracking). Update them **before** you add ads, analytics, sign-in, or online features. If you want legal certainty, have a lawyer review them.

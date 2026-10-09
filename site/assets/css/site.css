@@ -158,3 +158,19 @@ details.faq[open] summary { margin-bottom: 8px; }
 .preload-hero { background: linear-gradient(180deg, #4f8fc8, #2f6aa3); }
 .preload-hero h1 span { color: #ffc65a; }
 .phone-art { width: min(280px, 72%); margin: 0 auto; border-radius: 28px; border: 6px solid #10233d; box-shadow: 0 24px 60px rgba(0,0,0,.4); }
+
+/* Contact form */
+.contact-form { display: grid; gap: 18px; max-width: 720px; }
+.contact-form label { display: grid; gap: 6px; font-weight: 700; font-size: .95rem; }
+.contact-form input, .contact-form select, .contact-form textarea {
+  font: inherit; font-weight: 400; color: var(--text); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; width: 100%;
+}
+.contact-form input:focus, .contact-form select:focus, .contact-form textarea:focus { outline: 2px solid var(--orange); outline-offset: 1px; border-color: transparent; }
+.contact-form textarea { resize: vertical; min-height: 150px; }
+.contact-form button { justify-self: start; cursor: pointer; font: inherit; font-weight: 700; }
+.field-row { display: grid; gap: 18px; }
+@media (min-width: 720px) { .field-row { grid-template-columns: 1fr 1fr; } }
+.hint { font-weight: 400; color: var(--muted); font-size: .88rem; }
+.hp { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+.form-alert { max-width: 720px; margin-bottom: 18px; padding: 14px 18px; border-radius: 12px; background: #fdecea; color: #8a1c12; border: 1px solid #f5c2bc; font-weight: 600; }
