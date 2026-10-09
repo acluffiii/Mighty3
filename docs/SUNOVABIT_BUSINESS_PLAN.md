@@ -37,13 +37,13 @@ Startup costs are deliberately tiny (see §9). The founder writes the code, host
 **Problem:** Estimates get written on paper hail matrices or clunky desktop tools, then re-typed. That's slow, error-prone, and looks unprofessional.
 **Solution:** A panel-by-panel "card deck" estimator that:
 - detects dents in photos using Difference-of-Gaussians (DOG) image analysis
-- measures dents with LiDAR, photo, or dual-camera measuring
+- measures dents with photo or dual-camera measuring
 - fills in coin-size brackets and pricing automatically
 - handles two vehicles at once
 - exports a clean PDF on the spot
 - includes a Home Screen widget
 
-**Roadmap:** insurer platform connections (Mitchell, then CCC), team accounts, a shared price matrix, and cloud backup.
+**Roadmap:** LiDAR dent measuring on Pro iPhones, insurer platform connections (Mitchell, then CCC), team accounts, a shared price matrix, and cloud backup.
 **Edge:** Built by someone who knows the trade, phone-first, and fast in the field.
 
 ### 3.2 Mow Money (B2C, iPhone game)
@@ -112,7 +112,7 @@ Apple takes **15%** of App Store revenue if you join the App Store Small Busines
 
 ## 8. Technology
 
-- **Apps:** Swift and SwiftUI. DentDOG uses ARKit (LiDAR), AVFoundation, and on-device image processing; builds run through XcodeGen and Codemagic CI. Mow Money is likely SpriteKit, or Unity/Godot if it needs 3D landmarks.
+- **Apps:** Swift and SwiftUI. DentDOG uses AVFoundation (camera), and on-device image processing; builds run through XcodeGen and Codemagic CI. Mow Money is likely SpriteKit, or Unity/Godot if it needs 3D landmarks.
 - **Website:** static HTML and CSS. It runs on **Bluehost** (paid; includes the first-year domain, SSL and support@sunovabit.com email) or **GitHub Pages** (free). Upload instructions for both are in `site/README.md`.
 - **Email:** iCloud for now; later, support@sunovabit.com through Bluehost email, or through Cloudflare Email Routing (free) if the site is on GitHub Pages.
 - **Privacy by design:** data stays on the device, with no third-party tracking by default.
