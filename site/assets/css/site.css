@@ -157,7 +157,11 @@ details.faq[open] summary { margin-bottom: 8px; }
 /* Preload */
 .preload-hero { background: linear-gradient(180deg, #4f8fc8, #2f6aa3); }
 .preload-hero h1 span { color: #ffc65a; }
-.phone-art { width: min(280px, 72%); margin: 0 auto; border-radius: 28px; border: 6px solid #10233d; box-shadow: 0 24px 60px rgba(0,0,0,.4); }
+.phone-art {
+  width: min(240px, 62%, calc(62vh * 9 / 16)); aspect-ratio: 9 / 16; height: auto; object-fit: cover;
+  margin: 0 auto; border-radius: 26px; border: 6px solid #10233d; box-shadow: 0 24px 60px rgba(0,0,0,.4);
+}
+@media (max-width: 720px) { .phone-art { width: min(200px, 60%); } }
 
 /* Contact form */
 .contact-form { display: grid; gap: 18px; max-width: 720px; }
