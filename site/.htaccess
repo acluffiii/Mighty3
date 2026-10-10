@@ -11,6 +11,9 @@ ErrorDocument 404 /404.html
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
+  # Preload was renamed Preloader: send old /preload/... links to the matching /preloader/... page
+  RewriteRule ^preload(/.*)?$ https://%{HTTP_HOST}/preloader$1 [R=301,L]
+
   # Send www.sunovabit.com to sunovabit.com, always over https
   RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
   RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]

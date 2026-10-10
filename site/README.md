@@ -7,7 +7,7 @@ index.html              Company home (apps, custom solutions, our roots, contact
 dentdog/                DentDOG PDR: product page, support.html, privacy.html
 mowmoney/               Mow Money: product page, support.html, privacy.html
 contact/                Contact form (index.html), thank-you page, and send.php, which emails messages to you
-preload/                Preload: product page, support/, privacy/, terms/ (folder-style URLs)
+preloader/              Preloader: product page with screenshot gallery, support/, privacy/, terms/ (folder-style URLs). Old /preload/ links redirect here.
 privacy.html            Website privacy policy
 404.html                "Well, that's a sunovabit." page
 assets/css/site.css     All styles (light and dark mode)
@@ -23,7 +23,7 @@ sunovabit-site.zip      Ready-to-upload bundle for Bluehost
 |---|---|---|---|
 | DentDOG PDR | `https://<your-site>/dentdog/support.html` | `https://<your-site>/dentdog/privacy.html` | `https://<your-site>/dentdog/` |
 | Mow Money | `https://<your-site>/mowmoney/support.html` | `https://<your-site>/mowmoney/privacy.html` | `https://<your-site>/mowmoney/` |
-| Preload | `https://<your-site>/preload/support/` | `https://<your-site>/preload/privacy/` | `https://<your-site>/preload/` |
+| Preloader | `https://<your-site>/preloader/support/` | `https://<your-site>/preloader/privacy/` | `https://<your-site>/preloader/` |
 
 `<your-site>` is `sunovabit.com` on Bluehost. With GitHub Pages, it's `sunovabit.github.io` until you connect the domain.
 
@@ -76,10 +76,10 @@ Bluehost's intro price for the Basic plan is a few dollars a month, paid 12–36
 The site never shows an email address. Every "contact" or "support" button goes to the form at `/contact/`. The form sends to `contact/send.php`, which emails the message to you. Your address appears **only** in `send.php`, which runs on the server and is never shown to visitors.
 
 - **Where messages go:** `TO_EMAIL` near the top of `contact/send.php` (currently `acluffiii@icloud.com`). To change it, edit that one line and re-upload just `send.php`.
-- **What you receive:** an email titled like `[Sunovabit] Preload: Jane Doe` with the visitor's name, email, topic, device, and message. **Hit Reply** to answer them directly; your reply goes to their address.
+- **What you receive:** an email titled like `[Sunovabit] Preloader: Jane Doe` with the visitor's name, email, topic, device, and message. **Hit Reply** to answer them directly; your reply goes to their address.
 - **Spam protection:** a hidden trap field that bots fill in (their messages are silently dropped), at most 5 messages per hour from one visitor, and messages with more than 3 links are refused. No CAPTCHA puzzles.
 - **Sender address:** messages come from `no-reply@sunovabit.com` (`FROM_EMAIL`). It doesn't need to be a real mailbox, but it must use your own domain, or iCloud may reject the message. If messages ever stop arriving, create a real `no-reply@sunovabit.com` mailbox in Bluehost → Email; that usually fixes delivery.
-- **Topics:** the dropdown choices are listed in both `contact/index.html` and `send.php`. Links like `/contact/?topic=preload` pre-select a topic.
+- **Topics:** the dropdown choices are listed in both `contact/index.html` and `send.php`. Links like `/contact/?topic=preloader` pre-select a topic.
 
 ## Editing
 

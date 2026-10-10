@@ -13,7 +13,7 @@ const TOPICS = [
     'general'  => 'General question',
     'dentdog'  => 'DentDOG PDR',
     'mowmoney' => 'Mow Money',
-    'preload'  => 'Preload',
+    'preloader' => 'Preloader',
     'custom'   => 'Custom project / business inquiry',
     'launch'   => 'Mow Money launch list',
 ];
