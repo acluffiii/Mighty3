@@ -36,14 +36,12 @@ Startup costs are deliberately tiny (see §9). The founder writes the code, host
 **Who it's for:** PDR technicians, hail chasers, and small dent shops who write estimates on hail lots, at dealerships, and in driveways.
 **Problem:** Estimates get written on paper hail matrices or clunky desktop tools, then re-typed. That's slow, error-prone, and looks unprofessional.
 **Solution:** A panel-by-panel "card deck" estimator that:
-- detects dents in photos using Difference-of-Gaussians (DOG) image analysis
-- measures dents with photo or dual-camera measuring
 - fills in coin-size brackets and pricing automatically
 - handles two vehicles at once
 - exports a clean PDF on the spot
 - includes a Home Screen widget
 
-**Roadmap:** LiDAR dent measuring on Pro iPhones, insurer platform connections (Mitchell, then CCC), team accounts, a shared price matrix, and cloud backup.
+**Roadmap:** automatic dent detection (Difference-of-Gaussians image analysis), photo, dual-camera and LiDAR dent measuring, insurer platform connections (Mitchell, then CCC), team accounts, a shared price matrix, and cloud backup.
 **Edge:** Built by someone who knows the trade, phone-first, and fast in the field.
 
 ### 3.2 Mow Money (B2C, iPhone game)
