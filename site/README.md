@@ -1,6 +1,6 @@
 # Sunovabit website
 
-Plain static HTML and CSS: no build step, no framework, no database. Open any `.html` file in a browser to preview it. It runs on any web host. The two easiest are **Bluehost** (option A, paid, includes a domain and email) and **GitHub Pages** (option B, free).
+Plain static HTML and CSS: no build step, no framework, no database. Open any `.html` file in a browser to preview it. It runs on any web host. The two easiest are **Hostinger** (option A, paid, includes a domain and email) and **GitHub Pages** (option B, free).
 
 ```
 index.html              Company home (apps, custom solutions, our roots, contact)
@@ -12,9 +12,9 @@ privacy.html            Website privacy policy
 404.html                "Well, that's a sunovabit." page
 assets/css/site.css     All styles (light and dark mode)
 assets/img/             Logos and app icons
-.htaccess               Bluehost/Apache settings: https redirect, 404 page, caching (hidden file)
+.htaccess               Hostinger/Apache settings: https redirect, 404 page, caching (hidden file)
 build-zip.sh            Rebuilds sunovabit-site.zip after you edit anything
-sunovabit-site.zip      Ready-to-upload bundle for Bluehost
+sunovabit-site.zip      Ready-to-upload bundle for Hostinger
 ```
 
 ## URLs for App Store Connect
@@ -25,33 +25,26 @@ sunovabit-site.zip      Ready-to-upload bundle for Bluehost
 | Mow Money | `https://<your-site>/mowmoney/support.html` | `https://<your-site>/mowmoney/privacy.html` | `https://<your-site>/mowmoney/` |
 | Preloader | `https://<your-site>/preloader/support/` | `https://<your-site>/preloader/privacy/` | `https://<your-site>/preloader/` |
 
-`<your-site>` is `sunovabit.com` on Bluehost. With GitHub Pages, it's `sunovabit.github.io` until you connect the domain.
+`<your-site>` is `sunovabit.org` on Hostinger. With GitHub Pages, it's `sunovabit.github.io` until you connect the domain.
 
-## Option A: Hosting on Bluehost (about 20 minutes)
+## Option A: Hosting on Hostinger (current host)
 
-Bluehost's intro price for the Basic plan is a few dollars a month, paid 12–36 months up front, and it renews at a higher price. It includes a **free domain for the first year**, free SSL (the https padlock), and **email inboxes** like `support@sunovabit.com`.
+Hostinger supports everything this site uses: plain HTML pages, the PHP contact form, and the `.htaccess` settings file (https and www redirects, the custom 404 page, and the old `/preload/` links forwarding to `/preloader/`).
 
-1. **Sign up** at bluehost.com and pick the cheapest shared hosting plan (Basic). When it asks for a domain, choose **sunovabit.com**. At checkout, **untick the extras** (SiteLock, Codeguard, "Pro" SEO tools); the site doesn't need them.
-2. **Skip WordPress.** During onboarding, Bluehost offers to install WordPress or a site builder. Choose *Skip* or *I don't need help*. WordPress would replace this site with something you'd have to keep updating.
-3. **Upload the site:**
-   1. Open your Bluehost dashboard → **Hosting** (or **Advanced**) → **cPanel** → **File Manager**.
-   2. Open the **`public_html`** folder. Delete any placeholder files in it (`index.html`, `default.html`, `coming-soon` files). Don't delete `cgi-bin` or `.well-known` if they're there.
-   3. Click **Upload** and choose `sunovabit-site.zip` from this folder.
-   4. Back in File Manager, right-click the zip → **Extract** → extract into `/public_html`. Then delete the zip.
-   5. Check: `public_html` should now hold `index.html`, `404.html`, `privacy.html`, and the folders `assets`, `dentdog` and `mowmoney`. The `.htaccess` file is hidden; to see it, click **Settings** (top right) → tick **Show Hidden Files**.
-4. **Turn on SSL:** dashboard → **Security** (or **Websites → Security**) → turn on the free **SSL certificate**. It can take a few minutes to a few hours to activate. Once it's on, `.htaccess` sends every visitor to `https://sunovabit.com`.
-5. **Test the contact form:** open `https://sunovabit.com/contact/`, send yourself a test message, and check your iCloud inbox. If it's not there within a few minutes, check **Junk**. Mark it *Not Junk* once and later messages will land in your inbox.
-6. **Test the pages:** open `https://sunovabit.com`, `https://sunovabit.com/dentdog/`, and `https://sunovabit.com/nope` (you should see the "Well, that's a sunovabit." page). Then paste the URLs above into App Store Connect.
+1. **Upload:** in **hPanel**, go to **Websites**, click **Dashboard** for sunovabit.org, then open **File Manager** and the **`public_html`** folder. Delete Hostinger's placeholder page (`default.php` or `index.php`). Click **Upload**, choose **File**, and pick `sunovabit-site.zip`.
+2. **Extract:** right-click the zip, choose **Extract**, and extract straight into `public_html` (not a subfolder). Delete the zip. `public_html` should now hold `index.html` and the folders `assets`, `contact`, `dentdog`, `mowmoney` and `preloader`. The `.htaccess` file is hidden by default.
+3. **SSL:** under **Security → SSL**, the free certificate should show **Active**. Hostinger usually turns it on automatically within an hour.
+4. **Domain:** if sunovabit.org was bought somewhere else, change its nameservers to the ones hPanel shows under **Domains**. It can take up to 24 hours to work everywhere.
+5. **Contact form:** under **Emails**, create `no-reply@sunovabit.org` (the address the form sends from). Then send a test message from `https://sunovabit.org/contact/` and check your iCloud inbox, including **Junk**.
+6. **Test the pages:** open `https://sunovabit.org`, `https://sunovabit.org/dentdog/`, and `https://sunovabit.org/nope` (you should see the "Well, that's a sunovabit." page). Then paste the URLs above into App Store Connect.
 
-**Updating the site later:** edit the files, run `bash site/build-zip.sh`, and upload and extract the new zip over the old files. Or upload just the files you changed through File Manager.
-
-> **New domain, slow start:** a brand-new domain can take up to 24–48 hours to work everywhere. If the site doesn't load right away, wait and try again before changing anything.
+**Updating the site later:** run `bash site/build-zip.sh`, then upload and extract the new zip over the old files in `public_html`, saying yes to overwrite.
 
 ## Option B: Hosting it free on GitHub Pages (about 15 minutes)
 
 1. **Create a free GitHub organization** named `sunovabit` (github.com → your avatar → *Your organizations* → *New organization* → Free plan). That makes the free URL `https://sunovabit.github.io` instead of one with your personal username in it.
 2. **Create a public repository** in that org named exactly `sunovabit.github.io`.
-3. **Upload the contents of this `site/` folder**: the files themselves, not the folder. (`.htaccess` and the zip are only for Bluehost; they're harmless here.) **Note:** GitHub Pages can't run PHP, so the contact form won't send messages there. It only works on Bluehost or another host with PHP. Use *Add file → Upload files*, or git:
+3. **Upload the contents of this `site/` folder**: the files themselves, not the folder. (`.htaccess` and the zip are only for Hostinger; they're harmless here.) **Note:** GitHub Pages can't run PHP, so the contact form won't send messages there. It only works on Hostinger or another host with PHP. Use *Add file → Upload files*, or git:
    ```bash
    git clone https://github.com/sunovabit/sunovabit.github.io.git
    cp -R site/* sunovabit.github.io/
@@ -62,13 +55,13 @@ Bluehost's intro price for the Basic plan is a few dollars a month, paid 12–36
 
 ### Connecting a custom domain to GitHub Pages
 
-1. Buy `sunovabit.com` at **Cloudflare Registrar** (at-cost pricing, about $10–11 a year) or Porkbun.
+1. Buy `sunovabit.org` at **Cloudflare Registrar** (at-cost pricing, about $10–11 a year) or Porkbun.
 2. In your domain's DNS settings, add these records:
    - `A` records for `@` → `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`
    - `CNAME` record for `www` → `sunovabit.github.io`
    - On Cloudflare, set these records to **DNS only** (grey cloud) until GitHub has issued your certificate.
-3. Rename `CNAME.example` to `CNAME` (it contains `sunovabit.com`) and push it.
-4. In **Settings → Pages**, enter `sunovabit.com` as the custom domain, wait for the DNS check, then tick **Enforce HTTPS**.
+3. Rename `CNAME.example` to `CNAME` (it contains `sunovabit.org`) and push it.
+4. In **Settings → Pages**, enter `sunovabit.org` as the custom domain, wait for the DNS check, then tick **Enforce HTTPS**.
 5. Update the URLs in App Store Connect.
 
 ## Contact form
@@ -78,11 +71,11 @@ The site never shows an email address. Every "contact" or "support" button goes 
 - **Where messages go:** `TO_EMAIL` near the top of `contact/send.php` (currently `acluffiii@icloud.com`). To change it, edit that one line and re-upload just `send.php`.
 - **What you receive:** an email titled like `[Sunovabit] Preloader: Jane Doe` with the visitor's name, email, topic, device, and message. **Hit Reply** to answer them directly; your reply goes to their address.
 - **Spam protection:** a hidden trap field that bots fill in (their messages are silently dropped), at most 5 messages per hour from one visitor, and messages with more than 3 links are refused. No CAPTCHA puzzles.
-- **Sender address:** messages come from `no-reply@sunovabit.com` (`FROM_EMAIL`). It doesn't need to be a real mailbox, but it must use your own domain, or iCloud may reject the message. If messages ever stop arriving, create a real `no-reply@sunovabit.com` mailbox in Bluehost → Email; that usually fixes delivery.
+- **Sender address:** messages come from `no-reply@sunovabit.org` (`FROM_EMAIL`). It doesn't need to be a real mailbox, but it must use your own domain, or iCloud may reject the message. If messages ever stop arriving, create a real `no-reply@sunovabit.org` mailbox in Hostinger → Email; that usually fixes delivery.
 - **Topics:** the dropdown choices are listed in both `contact/index.html` and `send.php`. Links like `/contact/?topic=preloader` pre-select a topic.
 
 ## Editing
 
-Every page uses the same header and footer, so a change to the menu has to be made in each `.html` file. Search and replace works well for that. Link previews (when someone shares the site in a text or on social media) use `https://sunovabit.com/assets/img/og-image.png`; if the site lives at a different address, search and replace that address too.
+Every page uses the same header and footer, so a change to the menu has to be made in each `.html` file. Search and replace works well for that. Link previews (when someone shares the site in a text or on social media) use `https://sunovabit.org/assets/img/og-image.png`; if the site lives at a different address, search and replace that address too.
 
 > The privacy policies are written plainly and match how the apps work today (no accounts, no ads, no tracking). Update them **before** you add ads, analytics, sign-in, or online features. If you want legal certainty, have a lawyer review them.

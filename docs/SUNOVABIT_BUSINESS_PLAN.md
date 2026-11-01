@@ -78,7 +78,7 @@ Apple takes **15%** of App Store revenue if you join the App Store Small Busines
 
 ## 6. Marketing plan
 
-1. **Website** (sunovabit.com) with support and privacy pages for each app. This is required for App Store review.
+1. **Website** (sunovabit.org) with support and privacy pages for each app. This is required for App Store review.
 2. **DentDOG:**
    - Demo videos of a real hail-lot walk-around
    - A free trial during hail season (March–June in Texas)
@@ -103,7 +103,7 @@ Apple takes **15%** of App Store revenue if you join the App Store Small Busines
 - [ ] **Enroll in the Apple Developer Program as an *Organization*** ($99 a year) so the App Store shows "Sunovabit LLC" instead of your personal name. If you're already enrolled as an individual, Apple can convert the account.
 - [ ] **Join the App Store Small Business Program** (15% commission).
 - [ ] **Run a trademark search** on USPTO.gov for "SUNOVABIT", "DentDOG", and "Mow Money". Note: a fintech company called "Sunbit" exists. It's a different industry, but the names look alike, so search carefully. Consider filing a federal trademark later (about $350 per class).
-- [ ] **Register the domain:** sunovabit.com (about $10–11 a year at Cloudflare Registrar).
+- [x] **Register the domain:** sunovabit.org.
 - [ ] **Publish privacy policies** (done in `site/`) and keep them updated as the apps change.
 - [ ] **Check Texas sales tax:** Apple collects tax on App Store sales; ask a CPA about custom software services.
 - [ ] **Keep business and personal money separate.** Track expenses for tax deductions.
@@ -111,8 +111,8 @@ Apple takes **15%** of App Store revenue if you join the App Store Small Busines
 ## 8. Technology
 
 - **Apps:** Swift and SwiftUI. DentDOG uses AVFoundation (camera), and on-device image processing; builds run through XcodeGen and Codemagic CI. Mow Money is likely SpriteKit, or Unity/Godot if it needs 3D landmarks.
-- **Website:** static HTML and CSS. It runs on **Bluehost** (paid; includes the first-year domain, SSL and support@sunovabit.com email) or **GitHub Pages** (free). Upload instructions for both are in `site/README.md`.
-- **Email:** iCloud for now; later, support@sunovabit.com through Bluehost email, or through Cloudflare Email Routing (free) if the site is on GitHub Pages.
+- **Website:** static HTML and CSS with a small PHP contact form, hosted on **Hostinger** at sunovabit.org. Upload instructions are in `site/README.md`.
+- **Email:** visitors use the website's contact form, which forwards messages to iCloud; no email address is shown on the site.
 - **Privacy by design:** data stays on the device, with no third-party tracking by default.
 
 ## 9. Startup budget (year 1)
@@ -120,8 +120,8 @@ Apple takes **15%** of App Store revenue if you join the App Store Small Busines
 | Item | Cost |
 |---|---|
 | Apple Developer Program | $99 / year |
-| Website hosting: **Bluehost** Basic (includes domain for year 1, SSL, email) | ~$36–$156 / year at intro pricing; renews higher |
-| *or* GitHub Pages (free) + domain at Cloudflare | $0 + ~$11 / year |
+| Website hosting: **Hostinger** shared hosting (SSL and email included) | check your Hostinger plan (intro pricing renews higher) |
+| Domain (sunovabit.org) | ~$10–15 / year |
 | Texas LLC filing | $300 (one-time) |
 | EIN, D-U-N-S | $0 |
 | Codemagic CI | $0 on the free tier (500 build minutes a month) |
@@ -135,7 +135,7 @@ Also budget for Texas franchise tax reports. Most small LLCs owe no tax, but the
 
 | When | Milestone |
 |---|---|
-| Month 1 | Site live (Bluehost or GitHub Pages); domain bought; LLC, EIN, and D-U-N-S filed; logo picked |
+| Month 1 | Site live on Hostinger at sunovabit.org; domain bought; LLC, EIN, and D-U-N-S filed; logo picked |
 | Month 2 | DentDOG on TestFlight with 5–10 real PDR techs; fix bugs found in the field |
 | Month 3 | **DentDOG launches on the App Store** with subscriptions |
 | Months 3–6 | Mow Money prototype; start posting clips; grow the launch list |

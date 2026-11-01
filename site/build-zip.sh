@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Builds sunovabit-site.zip: everything Bluehost needs in public_html, nothing it doesn't.
+# Builds sunovabit-site.zip: everything the web host needs in public_html, nothing it doesn't.
 #   bash site/build-zip.sh
 set -euo pipefail
 cd "$(dirname "$0")"

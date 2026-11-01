@@ -1,12 +1,12 @@
 <?php
-// Sunovabit contact form handler (runs on Bluehost's PHP).
+// Sunovabit contact form handler (runs on Hostinger's PHP).
 // Receives the form on contact/index.html and emails it to TO_EMAIL.
 // The address below lives only on the server; visitors never see it.
 
 const TO_EMAIL   = 'acluffiii@icloud.com';
 // Must be an address at your own domain, or mail providers may reject the message.
 // It doesn't need to be a real mailbox.
-const FROM_EMAIL = 'no-reply@sunovabit.com';
+const FROM_EMAIL = 'no-reply@sunovabit.org';
 const SITE_NAME  = 'Sunovabit';
 
 const TOPICS = [
@@ -80,7 +80,7 @@ if (count($hits) >= MAX_PER_HOUR) {
 }
 
 $subject = '[' . SITE_NAME . '] ' . $topic . ': ' . $name;
-$body = "New message from the sunovabit.com contact form\n\n"
+$body = "New message from the sunovabit.org contact form\n\n"
       . "Name:   $name\n"
       . "Email:  $email\n"
       . "Topic:  $topic\n"

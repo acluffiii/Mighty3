@@ -1,4 +1,4 @@
-# Sunovabit — Apache settings for Bluehost (or any cPanel/Apache host).
+# Sunovabit — Server settings for Hostinger (or any Apache/LiteSpeed host).
 # Upload this file into public_html along with the rest of the site.
 
 # Serve index.html for folders, so /dentdog/ loads dentdog/index.html
@@ -14,11 +14,11 @@ ErrorDocument 404 /404.html
   # Preload was renamed Preloader: send old /preload/... links to the matching /preloader/... page
   RewriteRule ^preload(/.*)?$ https://%{HTTP_HOST}/preloader$1 [R=301,L]
 
-  # Send www.sunovabit.com to sunovabit.com, always over https
+  # Send www.sunovabit.org to sunovabit.org, always over https
   RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
   RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
 
-  # Send http:// to https:// (turn on the free SSL in Bluehost first)
+  # Send http:// to https:// (turn on the free SSL in Hostinger first)
   RewriteCond %{HTTPS} !=on
   RewriteCond %{HTTP:X-Forwarded-Proto} !https
   RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
