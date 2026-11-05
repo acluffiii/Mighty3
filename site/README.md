@@ -25,6 +25,10 @@ sunovabit-site.zip      Ready-to-upload bundle for Hostinger
 | Mow Money | `https://<your-site>/mowmoney/support.html` | `https://<your-site>/mowmoney/privacy.html` | `https://<your-site>/mowmoney/` |
 | Preloader | `https://<your-site>/preloader/support/` | `https://<your-site>/preloader/privacy/` | `https://<your-site>/preloader/` |
 
+**DentDOG Terms of Use (EULA):** `https://<your-site>/dentdog/terms.html`. Because DentDOG sells an auto-renewing subscription, Apple requires a Terms of Use link in the app's Description (or in App Store Connect's EULA field), and the app's subscription screen must link to both this page and the privacy policy.
+
+**Use the same domain everywhere.** The site is set up for `sunovabit.org`. App Review rejected the first DentDOG submission because the Support URL was `http://www.sunovabit.com`, which doesn't load. Every URL in App Store Connect must start with `https://sunovabit.org/`.
+
 `<your-site>` is `sunovabit.org` on Hostinger. With GitHub Pages, it's `sunovabit.github.io` until you connect the domain.
 
 ## Option A: Hosting on Hostinger (current host)
