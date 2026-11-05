@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 110" role="img" aria-label="THUMBIT">
+  <g transform="translate(0 2)"><g fill="none" stroke="#f3ead8" stroke-width="7" stroke-linecap="round">
+    <path d="M14 92 V52 A36 36 0 0 1 86 52 V92"/>
+    <path d="M26 92 V54 A24 24 0 0 1 74 54 V80"/>
+    <path d="M38 92 V56 A12 12 0 0 1 62 56 V92"/>
+  </g>
+  <circle cx="50" cy="57" r="4.5" fill="#d0271d"/></g>
+  <g transform="translate(128 25) scale(0.72)"><g fill="#f3ead8">
+    <path d="M0 0H72V20H46V100H26V20H0Z"/>
+    <path d="M84 0H104V40H136V0H156V100H136V60H104V100H84Z"/>
+    <path d="M168 0H188V64A16 16 0 0 0 220 64V0H240V64A36 36 0 0 1 168 64Z"/>
+    <path d="M252 100V0H274L296 44L318 0H340V100H320V38L302 74H290L272 38V100Z"/>
+    <path d="M436 0H456V100H436Z"/>
+    <path d="M468 0H540V20H514V100H494V20H468Z"/>
+  </g>
+  <g fill="none" stroke="#f3ead8" stroke-width="20">
+    <path d="M362 0V100"/>
+    <path d="M352 10H390A20 20 0 0 1 390 50H362M362 50H394A20 20 0 0 1 394 90H352"/>
+  </g></g>
+</svg>
