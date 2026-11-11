@@ -6,6 +6,7 @@ Plain static HTML and CSS: no build step, no framework, no database. Open any `.
 index.html              Company home (apps, custom solutions, our roots, contact)
 dentdog/                DentDOG PDR: product page, support.html, privacy.html
 mowmoney/               Mow Money: product page, support.html, privacy.html
+ovayonder/              OvaYonder: product page, support/, privacy/, terms/ (folder-style URLs)
 contact/                Contact form (index.html), thank-you page, and send.php, which emails messages to you
 preloader/              Preloader: product page with screenshot gallery, support/, privacy/, terms/ (folder-style URLs). Old /preload/ links redirect here.
 privacy.html            Website privacy policy
@@ -24,6 +25,7 @@ sunovabit-site.zip      Ready-to-upload bundle for Hostinger
 | DentDOG PDR | `https://<your-site>/dentdog/support.html` | `https://<your-site>/dentdog/privacy.html` | `https://<your-site>/dentdog/` |
 | Mow Money | `https://<your-site>/mowmoney/support.html` | `https://<your-site>/mowmoney/privacy.html` | `https://<your-site>/mowmoney/` |
 | Preloader | `https://<your-site>/preloader/support/` | `https://<your-site>/preloader/privacy/` | `https://<your-site>/preloader/` |
+| OvaYonder | `https://<your-site>/ovayonder/support/` | `https://<your-site>/ovayonder/privacy/` | `https://<your-site>/ovayonder/` |
 
 `<your-site>` is `sunovabit.org` on Hostinger. With GitHub Pages, it's `sunovabit.github.io` until you connect the domain.
 
