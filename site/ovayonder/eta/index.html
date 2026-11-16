@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Live ETA · OvaYonder</title>
+<meta name="robots" content="noindex, nofollow">
+<!-- The page URL holds the trip's share token: never send it to anyone as a Referer. -->
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WpVyvjJW5Sc0wcjhy1ZoEBoKzaEp8Xv9HDp6DLbUQXk='; style-src 'unsafe-inline'; img-src 'self'; base-uri 'none'; form-action 'none'">
+<meta name="theme-color" content="#0b2a55">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="OvaYonder">
+<meta property="og:title" content="Live ETA">
+<meta property="og:description" content="Someone is sharing their trip with you on OvaYonder">
+<meta property="og:image" content="https://sunovabit.org/ovayonder/assets/ovayonder-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+  :root {
+    --navy: #0b2a55; --navy-2: #071b38; --orange: #f0913f; --orange-ink: #b4560f;
+    --bg: #fbf8f2; --surface: #ffffff; --text: #17202e; --muted: #5a6474; --line: #e4dccd;
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Inter, system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0d1626; --surface: #14213a; --text: #eef1f6; --muted: #a8b2c3; --line: #26385a; --orange-ink: #f5a964; }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 17px/1.55 var(--font); }
+  a { color: var(--orange-ink); }
+  .bar { background: radial-gradient(ellipse at 20% -10%, #1d4a85 0%, var(--navy) 55%, var(--navy-2) 100%); color: #fff; }
+  .bar .in { max-width: 720px; margin: 0 auto; padding: 14px 16px; display: flex; align-items: center; gap: 10px; }
+  .bar img { width: 34px; height: 34px; border-radius: 8px; display: block; }
+  .bar b { font-size: 1.1rem; }
+  .bar b span { color: var(--orange); }
+  main { max-width: 720px; margin: 0 auto; padding: 24px 16px 40px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 22px 18px; }
+  h1 { margin: 0 0 8px; font-size: 1.5rem; line-height: 1.2; }
+  p { margin: 0 0 16px; color: var(--muted); }
+  .btn { display: flex; align-items: center; justify-content: center; min-height: 54px; margin-top: 12px; padding: 14px 18px; border-radius: 14px; font-weight: 700; font-size: 1.05rem; text-decoration: none; border: 2px solid var(--line); color: var(--text); background: var(--surface); }
+  .btn.primary { background: var(--orange); border-color: var(--orange); color: #fff; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<header class="bar"><div class="in"><img src="/assets/ovayonder-icon.jpg" alt="" width="34" height="34"><b>Ova<span>Yonder</span></b></div></header>
+<main>
+  <div class="card">
+    <h1>Someone is sharing their trip with you</h1>
+    <p>Open this link on an iPhone with OvaYonder installed to follow their trip live.</p>
+    <a class="btn primary" id="open" href="#" hidden>Open in OvaYonder</a>
+    <a class="btn" href="https://sunovabit.org/ovayonder/">About OvaYonder</a>
+  </div>
+</main>
+<script>
+(function () {
+  'use strict';
+  // /eta/<token>: share tokens are short letters and digits. Anything else gets no app button.
+  var m = window.location.pathname.match(/\/eta\/([A-Za-z0-9_-]{1,64})\/?$/);
+  if (!m) return;
+  var open = document.getElementById('open');
+  open.href = 'ovayonder://eta/' + m[1];
+  open.hidden = false;
+})();
+</script>
+</body>
+</html>

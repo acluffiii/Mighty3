@@ -26,4 +26,14 @@
   RewriteCond %{REQUEST_URI} !^/(p|eta|\.well-known)(/|$)
   RewriteCond %{REQUEST_URI} !^/assets/ovayonder-icon\.jpg$
   RewriteRule ^(.*)$ https://sunovabit.org/ovayonder/$1 [L,R=301]
+
+  # Live ETA links look like /eta/3f9a1c2b7d4e. There is no file per trip, so every token shows
+  # the same short page (people with the app are sent to the app before this page loads).
+  RewriteRule ^eta/[A-Za-z0-9_-]+/?$ eta/index.html [L]
 </IfModule>
+
+# Apple fetches this file to learn which links open the app. It must be served as JSON over
+# https with no redirect. (The subdomain rule above leaves /.well-known/ alone.)
+<Files "apple-app-site-association">
+  ForceType application/json
+</Files>

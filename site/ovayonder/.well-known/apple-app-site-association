@@ -1,0 +1,14 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["4L2HGVYY25.org.sunovabit.ovayonder"],
+        "components": [
+          { "/": "/eta/*", "comment": "Live ETA links open OvaYonder" },
+          { "/": "/p", "comment": "Shared pin, no trailing slash" },
+          { "/": "/p/*", "comment": "Shared pin" }
+        ]
+      }
+    ]
+  }
+}

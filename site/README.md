@@ -11,6 +11,9 @@ ovayonder/              OvaYonder: product page, support/, privacy/, terms/ (fol
                         https://ovayonder.sunovabit.org/p/?lat=29.7604&lng=-95.3698&name=Downtown%20Houston
                         (the subdomain's folder is public_html/ovayonder; ovayonder/.htaccess forwards every other
                         subdomain address to sunovabit.org/ovayonder/ and leaves /p/, /eta/ and /.well-known/ alone)
+                        ovayonder/eta/ is the short page for live ETA links (/eta/<token>) when the app isn't installed
+                        ovayonder/.well-known/apple-app-site-association sends /eta/ and /p/ links to the OvaYonder app
+                        (Team ID 4L2HGVYY25, bundle org.sunovabit.ovayonder); it must stay JSON with no redirect
                         (lat/lng required; name optional; no cookies, no tracking; noindex)
 contact/                Contact form (index.html), thank-you page, and send.php, which emails messages to you
 preloader/              Preloader: product page with screenshot gallery, support/, privacy/, terms/ (folder-style URLs). Old /preload/ links redirect here.
