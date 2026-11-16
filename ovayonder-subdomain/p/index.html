@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shared location · OvaYonder</title>
+<meta name="robots" content="noindex, nofollow">
+<!-- The page URL holds the coordinates and place name: never send it to anyone as a Referer. -->
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-/Ysy7v+ygJB1YM0zBEGj/GSf1nk9lEzGUAhOukWJ3+4='; style-src 'unsafe-inline'; img-src https://sunovabit.org; frame-src https://www.openstreetmap.org; base-uri 'none'; form-action 'none'">
+<meta name="theme-color" content="#0b2a55">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="OvaYonder">
+<meta property="og:title" content="Shared location">
+<meta property="og:description" content="Open this spot in your maps app">
+<meta property="og:image" content="https://sunovabit.org/ovayonder/assets/ovayonder-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+  :root {
+    --navy: #0b2a55; --navy-2: #071b38; --orange: #f0913f; --orange-ink: #b4560f;
+    --bg: #fbf8f2; --surface: #ffffff; --surface-2: #f3ede2;
+    --text: #17202e; --muted: #5a6474; --line: #e4dccd;
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Inter, system-ui, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0d1626; --surface: #14213a; --surface-2: #1a2a47; --text: #eef1f6; --muted: #a8b2c3; --line: #26385a; --orange-ink: #f5a964; }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 17px/1.55 var(--font); }
+  a { color: var(--orange-ink); }
+  .bar { background: radial-gradient(ellipse at 20% -10%, #1d4a85 0%, var(--navy) 55%, var(--navy-2) 100%); color: #fff; }
+  .bar .in { max-width: 720px; margin: 0 auto; padding: 14px 16px; display: flex; align-items: center; gap: 10px; }
+  .bar img { width: 34px; height: 34px; border-radius: 8px; display: block; }
+  .bar b { font-size: 1.1rem; letter-spacing: .01em; }
+  .bar b span { color: var(--orange); }
+  main { max-width: 720px; margin: 0 auto; padding: 22px 16px 40px; }
+  .eyebrow { font: 600 .75rem/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--orange-ink); margin: 0 0 8px; }
+  h1 { margin: 0; font-size: clamp(1.6rem, 6vw, 2.1rem); line-height: 1.15; overflow-wrap: anywhere; }
+  .coords { margin: 6px 0 18px; font: .9rem/1.4 var(--mono); color: var(--muted); }
+  .map { position: relative; border-radius: 16px; overflow: hidden; border: 1px solid var(--line); background: var(--surface-2); aspect-ratio: 4 / 3; }
+  .map iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  .attrib { margin: 6px 2px 0; font-size: .78rem; color: var(--muted); }
+  .attrib a { color: var(--muted); }
+  .buttons { display: grid; gap: 12px; margin-top: 20px; }
+  .btn { display: flex; align-items: center; justify-content: center; min-height: 54px; padding: 14px 18px; border-radius: 14px; font-weight: 700; font-size: 1.05rem; text-align: center; text-decoration: none; border: 2px solid var(--line); background: var(--surface); color: var(--text); }
+  .btn.primary { background: var(--orange); border-color: var(--orange); color: #fff; }
+  .btn:active { transform: translateY(1px); }
+  @media (min-width: 560px) { .buttons { grid-template-columns: 1fr 1fr; } }
+  .invalid { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 22px 18px; }
+  .invalid h1 { font-size: 1.5rem; margin-bottom: 8px; }
+  .invalid p { margin: 0 0 14px; color: var(--muted); }
+  .from { margin-top: 30px; text-align: center; font-size: .9rem; color: var(--muted); }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<header class="bar"><div class="in"><img src="https://sunovabit.org/ovayonder/assets/ovayonder-icon.jpg" alt="" width="34" height="34"><b>Ova<span>Yonder</span></b></div></header>
+<main>
+  <section id="place" hidden>
+    <p class="eyebrow">Shared location</p>
+    <h1 id="name">Shared location</h1>
+    <p class="coords" id="coords"></p>
+    <div class="map"><iframe id="map" title="Map of the shared location" loading="lazy" referrerpolicy="no-referrer"></iframe></div>
+    <p class="attrib">Map data © <a id="osm" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a></p>
+    <div class="buttons" id="buttons"></div>
+  </section>
+  <section id="invalid" class="invalid" hidden>
+    <h1>This location link isn't valid</h1>
+    <p>The link may be cut off or mistyped. Ask the person who sent it to share the place again.</p>
+    <a class="btn primary" href="https://sunovabit.org/ovayonder/">Go to OvaYonder</a>
+  </section>
+  <noscript><div class="invalid"><h1>Turn on JavaScript</h1><p>This page needs JavaScript to read the shared location.</p></div></noscript>
+  <p class="from">Shared from <a href="https://sunovabit.org/ovayonder/">OvaYonder</a></p>
+</main>
+<script>
+(function () {
+  'use strict';
+  var q = new URLSearchParams(window.location.search);
+  // Strict decimal degrees only: no hex, exponents, "Infinity" or empty strings.
+  var num = /^[-+]?(\d+(\.\d*)?|\.\d+)$/;
+  var latS = (q.get('lat') || '').trim(), lngS = (q.get('lng') || '').trim();
+  var lat = num.test(latS) ? parseFloat(latS) : NaN;
+  var lng = num.test(lngS) ? parseFloat(lngS) : NaN;
+  if (!(lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180)) {
+    document.getElementById('invalid').hidden = false;
+    return;
+  }
+
+  // Name: plain text only (set with textContent), control characters removed, 80 characters max.
+  var raw = (q.get('name') || '').replace(/[\u0000-\u001f\u007f-\u009f​-‏‪-‮⁦-⁩]/g, ' ').replace(/\s+/g, ' ').trim();
+  var chars = Array.from(raw);
+  var name = chars.length > 80 ? chars.slice(0, 79).join('').trim() + '…' : raw;
+  var label = name || 'Shared location';
+  document.getElementById('name').textContent = label;
+  document.getElementById('coords').textContent = lat.toFixed(5) + ', ' + lng.toFixed(5);
+  document.title = (name ? label + ' · ' : 'Shared location · ') + 'OvaYonder';
+
+  // OpenStreetMap embed: a box about 0.01° across, centred on the pin. No API key.
+  var d = 0.005;
+  var box = [Math.max(lng - d, -180), Math.max(lat - d, -90), Math.min(lng + d, 180), Math.min(lat + d, 90)].map(function (v) { return v.toFixed(6); }).join(',');
+  document.getElementById('map').src = 'https://www.openstreetmap.org/export/embed.html?bbox=' + box + '&layer=mapnik&marker=' + lat.toFixed(6) + ',' + lng.toFixed(6);
+  document.getElementById('osm').href = 'https://www.openstreetmap.org/?mlat=' + lat.toFixed(6) + '&mlon=' + lng.toFixed(6) + '#map=16/' + lat.toFixed(5) + '/' + lng.toFixed(5);
+
+  var ll = lat + ',' + lng;
+  var apple = [
+    ['Open in Apple Maps', 'https://maps.apple.com/?ll=' + ll + '&q=' + encodeURIComponent(label)],
+    ['Get directions in Apple Maps', 'https://maps.apple.com/?daddr=' + ll + '&dirflg=d']
+  ];
+  var google = [
+    ['Open in Google Maps', 'https://www.google.com/maps/search/?api=1&query=' + ll],
+    ['Get directions in Google Maps', 'https://www.google.com/maps/dir/?api=1&destination=' + ll]
+  ];
+
+  // Order by device. iPadOS reports itself as a Mac, so "Macintosh" covers iPad too. No auto-redirect.
+  var ua = navigator.userAgent || '';
+  var isApple = /iPhone|iPad|iPod|Macintosh/.test(ua);
+  var isAndroid = /Android/.test(ua);
+  var list, primary;
+  if (isApple) { list = apple.concat(google); primary = 2; }
+  else if (isAndroid) { list = google.concat(apple); primary = 2; }
+  else { list = [apple[0], google[0], apple[1], google[1]]; primary = 0; }
+
+  var wrap = document.getElementById('buttons');
+  list.forEach(function (b, i) {
+    var a = document.createElement('a');
+    a.className = 'btn' + (i < primary ? ' primary' : '');
+    a.textContent = b[0];
+    a.href = b[1];
+    a.rel = 'noopener noreferrer';
+    wrap.appendChild(a);
+  });
+  document.getElementById('place').hidden = false;
+})();
+</script>
+</body>
+</html>
