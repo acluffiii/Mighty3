@@ -1,0 +1,451 @@
+OvaYonder: shared-pin links, copy and paste for Xcode
+
+This adds one feature: when someone taps a https://ovayonder.sunovabit.org/p/?lat=…&lng=…&name=… link and has OvaYonder installed, the app opens, drops an orange pin there, and shows a card with Score the drive, Save favorite and Remove pin. Live ETA links (/eta/…) keep working as before.
+
+Easiest way: the same changes are already on the claude/shared-pin-links branch of acluffiii/ovayonder. In Xcode: Source Control → Pull…, or switch to that branch. Then skip to Step 7. Use the copy-and-paste steps below only if you'd rather add the code by hand.
+
+This code was written to match the existing files but was not compiled here (no Xcode in this environment). Build it once and tell me any error line; I'll fix it.
+
+------------------------------------------------------------
+
+Step 1: Turn on Associated Domains (Apple Developer website, one time)
+
+1. Go to developer.apple.com → Account → Certificates, IDs & Profiles → Identifiers.
+2. Click org.sunovabit.ovayonder.
+3. Under Capabilities, tick Associated Domains, then click Save.
+
+Step 2: Check Xcode's Signing & Capabilities (one time)
+
+1. In Xcode, click the blue OvaYonder project, then the OvaYonder target, then Signing & Capabilities.
+2. You should see Associated Domains with applinks:ovayonder.sunovabit.org. It's already in OvaYonder.entitlements.
+3. If it isn't there: click + Capability, add Associated Domains, click +, and type applinks:ovayonder.sunovabit.org.
+
+Step 3: New file SharedPinLink.swift
+(Shortcut: SharedPinLink.swift is also in this zip. You can drag it into Xcode's OvaYonderCore > Sources > OvaYonderCore folder instead of pasting.)
+
+In the Project navigator, open the OvaYonderCore package: Sources → OvaYonderCore. Right-click the OvaYonderCore folder, choose New File… → Swift File, and name it SharedPinLink.swift. Replace everything in it with:
+
+===== COPY FROM HERE =====
+import Foundation
+
+/// A place someone shared from OvaYonder.
+///
+/// The link is `https://ovayonder.sunovabit.org/p/?lat=29.7604&lng=-95.3698&name=Downtown%20Houston`.
+/// Without the app, it opens a web page with the spot on a map and buttons for Apple Maps and
+/// Google Maps. With the app installed, the site's apple-app-site-association file sends `/p/`
+/// links to OvaYonder, and `SharedPinLink.pin(from:)` reads them. The web page applies the same
+/// rules: decimal degrees in range, and a plain-text name of at most 80 characters.
+public struct SharedPin: Equatable, Hashable, Sendable, Identifiable {
+    public let coordinate: Coordinate
+    /// The cleaned display name, or nil when the link had no usable name.
+    public let name: String?
+
+    public init(coordinate: Coordinate, name: String?) {
+        self.coordinate = coordinate
+        self.name = SharedPinLink.cleanName(name)
+    }
+
+    public var id: String { "\(coordinate.latitude),\(coordinate.longitude)|\(name ?? "")" }
+
+    /// The name, or "Shared location" when there isn't one.
+    public var title: String { name ?? SharedPinLink.untitled }
+}
+
+public enum SharedPinLink {
+    public static let untitled = "Shared location"
+    public static let maxNameLength = 80
+
+    /// Characters left as-is in a query value. Everything else, including `&`, `=`, `+` and
+    /// spaces, is percent-encoded, so any name survives the trip intact.
+    private static let unreserved = CharacterSet(
+        charactersIn: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~"
+    )
+
+    /// The link to text: `https://ovayonder.sunovabit.org/p/?lat=…&lng=…&name=…`.
+    public static func webURL(for pin: SharedPin) -> URL {
+        var query = "lat=\(degreesText(pin.coordinate.latitude))&lng=\(degreesText(pin.coordinate.longitude))"
+        if let name = pin.name, let encoded = name.addingPercentEncoding(withAllowedCharacters: unreserved) {
+            query += "&name=\(encoded)"
+        }
+        return URL(string: "https://\(LiveShareLink.webHost)/p/?\(query)")!
+    }
+
+    /// Reads a shared pin from a `https://ovayonder.sunovabit.org/p/?…` link (with or without the
+    /// slash after `p`) or from `ovayonder://p?…`. Returns nil for any other link, or when
+    /// `lat`/`lng` are missing, not plain decimal numbers, or out of range.
+    public static func pin(from url: URL) -> SharedPin? {
+        let scheme = url.scheme?.lowercased()
+        let host = url.host?.lowercased()
+        let isWebLink = (scheme == "https" || scheme == "http") && host == LiveShareLink.webHost && url.path == "/p"
+        let isAppLink = scheme == "ovayonder" && host == "p"
+        guard isWebLink || isAppLink else { return nil }
+
+        let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.percentEncodedQueryItems ?? []
+        func value(_ key: String) -> String? {
+            // Read the way a browser does: "+" is a space, then percent-escapes are decoded.
+            items.first { $0.name == key }?.value?
+                .replacingOccurrences(of: "+", with: " ")
+                .removingPercentEncoding
+        }
+        guard let latitude = degrees(value("lat"), limit: 90),
+              let longitude = degrees(value("lng"), limit: 180) else { return nil }
+        return SharedPin(coordinate: Coordinate(latitude: latitude, longitude: longitude), name: value("name"))
+    }
+
+    /// Plain decimal degrees only: an optional sign, digits, and at most one decimal point.
+    /// Rejects exponents, hex, "Infinity", "NaN" and empty text, then checks the range.
+    static func degrees(_ text: String?, limit: Double) -> Double? {
+        guard let text = text?.trimmingCharacters(in: .whitespaces), !text.isEmpty else { return nil }
+        var body = Substring(text)
+        if body.first == "-" || body.first == "+" { body = body.dropFirst() }
+        let parts = body.split(separator: ".", omittingEmptySubsequences: false)
+        let isDigit: (Character) -> Bool = { ("0"..."9").contains($0) }
+        guard parts.count <= 2,
+              parts.allSatisfy({ $0.allSatisfy(isDigit) }),
+              parts.contains(where: { !$0.isEmpty }),
+              let value = Double(text),
+              value.isFinite,
+              abs(value) <= limit else { return nil }
+        return value
+    }
+
+    /// Trims, turns control and invisible formatting characters into spaces, collapses
+    /// whitespace, and caps the name at 80 characters (79 plus "…"). Empty becomes nil.
+    static func cleanName(_ raw: String?) -> String? {
+        guard let raw else { return nil }
+        var scalars = String.UnicodeScalarView()
+        for scalar in raw.unicodeScalars {
+            switch scalar.properties.generalCategory {
+            case .control, .format, .lineSeparator, .paragraphSeparator:
+                scalars.append(" ")
+            default:
+                scalars.append(scalar)
+            }
+        }
+        let collapsed = String(scalars).split(whereSeparator: \.isWhitespace).joined(separator: " ")
+        guard !collapsed.isEmpty else { return nil }
+        guard collapsed.count > maxNameLength else { return collapsed }
+        return String(collapsed.prefix(maxNameLength - 1)).trimmingCharacters(in: .whitespaces) + "…"
+    }
+
+    /// Six decimal places (about 10 cm), without a trailing run of zeros.
+    static func degreesText(_ value: Double) -> String {
+        var text = String(format: "%.6f", value)
+        while text.hasSuffix("0") { text.removeLast() }
+        if text.hasSuffix(".") { text.removeLast() }
+        return text == "-0" ? "0" : text
+    }
+}
+===== COPY TO HERE =====
+
+Optional tests: right-click Tests → OvaYonderCoreTests, choose New File… → Swift File, name it SharedPinLinkTests.swift, and paste:
+
+===== COPY FROM HERE =====
+import XCTest
+@testable import OvaYonderCore
+
+final class SharedPinLinkTests: XCTestCase {
+    private let downtown = Coordinate(latitude: 29.7604, longitude: -95.3698)
+
+    func testWebURLFormat() {
+        let url = SharedPinLink.webURL(for: SharedPin(coordinate: downtown, name: "Downtown Houston"))
+        XCTAssertEqual(url.absoluteString, "https://ovayonder.sunovabit.org/p/?lat=29.7604&lng=-95.3698&name=Downtown%20Houston")
+        let noName = SharedPinLink.webURL(for: SharedPin(coordinate: downtown, name: nil))
+        XCTAssertEqual(noName.absoluteString, "https://ovayonder.sunovabit.org/p/?lat=29.7604&lng=-95.3698")
+    }
+
+    func testRoundTripKeepsAwkwardNames() {
+        for name in ["Downtown Houston", "A&B=C+D", "Café Ñandú 🍔", "50% off? #1", "<script>alert(1)</script>"] {
+            let url = SharedPinLink.webURL(for: SharedPin(coordinate: downtown, name: name))
+            let pin = SharedPinLink.pin(from: url)
+            XCTAssertEqual(pin?.name, name, url.absoluteString)
+            XCTAssertEqual(pin?.coordinate, downtown)
+        }
+    }
+
+    func testReadsAllLinkForms() throws {
+        let forms = [
+            "https://ovayonder.sunovabit.org/p/?lat=29.7604&lng=-95.3698&name=Downtown%20Houston",
+            "https://ovayonder.sunovabit.org/p?lat=29.7604&lng=-95.3698&name=Downtown%20Houston",
+            "https://OvaYonder.Sunovabit.org/p/?lat=29.7604&lng=-95.3698&name=Downtown+Houston",
+            "ovayonder://p?lat=29.7604&lng=-95.3698&name=Downtown%20Houston",
+        ]
+        for text in forms {
+            let pin = SharedPinLink.pin(from: try XCTUnwrap(URL(string: text)))
+            XCTAssertEqual(pin?.coordinate, downtown, text)
+            XCTAssertEqual(pin?.name, "Downtown Houston", text)
+        }
+        let literalPlus = SharedPinLink.pin(from: URL(string: "https://ovayonder.sunovabit.org/p/?lat=1&lng=2&name=A%2BB")!)
+        XCTAssertEqual(literalPlus?.name, "A+B")
+    }
+
+    func testRejectsBadCoordinates() {
+        let bad = [
+            "", "?lng=2", "?lat=1", "?lat=abc&lng=2", "?lat=999&lng=2", "?lat=1&lng=-181", "?lat=90.0001&lng=0",
+            "?lat=1e1&lng=2", "?lat=0x10&lng=2", "?lat=Infinity&lng=2", "?lat=NaN&lng=2", "?lat=.&lng=2", "?lat=--1&lng=2", "?lat=1.2.3&lng=2",
+        ]
+        for query in bad {
+            XCTAssertNil(SharedPinLink.pin(from: URL(string: "https://ovayonder.sunovabit.org/p/" + query)!), query)
+        }
+        XCTAssertNotNil(SharedPinLink.pin(from: URL(string: "https://ovayonder.sunovabit.org/p/?lat=-90&lng=180")!))
+        XCTAssertNotNil(SharedPinLink.pin(from: URL(string: "https://ovayonder.sunovabit.org/p/?lat=+.5&lng=-0")!))
+    }
+
+    func testOtherLinksAreNotPins() {
+        XCTAssertNil(SharedPinLink.pin(from: URL(string: "https://example.com/p/?lat=1&lng=2")!))
+        XCTAssertNil(SharedPinLink.pin(from: URL(string: "https://ovayonder.sunovabit.org/eta/abc123def456")!))
+        XCTAssertNil(SharedPinLink.pin(from: URL(string: "https://ovayonder.sunovabit.org/px/?lat=1&lng=2")!))
+        XCTAssertNil(SharedPinLink.pin(from: LiveShareLink.appURL(token: "abc123")))
+        // And a pin link is never mistaken for a live ETA.
+        XCTAssertNil(LiveShareLink.token(from: SharedPinLink.webURL(for: SharedPin(coordinate: downtown, name: "eta"))))
+    }
+
+    func testNameCleaning() {
+        XCTAssertNil(SharedPinLink.cleanName(nil))
+        XCTAssertNil(SharedPinLink.cleanName("   \n\t "))
+        XCTAssertEqual(SharedPinLink.cleanName("  Two\n lines\u{202E}and\u{200B}hidden  "), "Two lines and hidden")
+        let long = String(repeating: "A", count: 120)
+        let cleaned = SharedPinLink.cleanName(long)
+        XCTAssertEqual(cleaned?.count, 80)
+        XCTAssertEqual(cleaned?.hasSuffix("…"), true)
+        XCTAssertEqual(SharedPin(coordinate: downtown, name: "").title, "Shared location")
+    }
+
+    func testDegreesText() {
+        XCTAssertEqual(SharedPinLink.degreesText(29.7604), "29.7604")
+        XCTAssertEqual(SharedPinLink.degreesText(-95.369812345), "-95.369812")
+        XCTAssertEqual(SharedPinLink.degreesText(0), "0")
+        XCTAssertEqual(SharedPinLink.degreesText(-0.0000001), "0")
+    }
+}
+===== COPY TO HERE =====
+
+Step 4: MapViewModel.swift (3 pastes)
+
+4a. Find this line (⌘F):
+----- FIND THIS LINE (don't copy) -----
+    @Published var follow: FollowSession?
+----- END OF LINE TO FIND -----
+Paste this on the lines right after it:
+
+===== COPY FROM HERE =====
+    /// A place someone shared with an ovayonder.sunovabit.org/p/ link: shown as a pin on the map.
+    @Published var sharedPin: SharedPin?
+    /// The shared pin's detail sheet.
+    @Published var sharedPinDetail: SharedPin?
+===== COPY TO HERE =====
+
+4b. Find func openShare(_ url: URL) {. Replace the first two lines of that function, which are:
+----- FIND THIS LINE (don't copy) -----
+    func openShare(_ url: URL) {
+        guard let token = LiveShareLink.token(from: url) else { return }
+----- END OF LINE TO FIND -----
+with:
+
+===== COPY FROM HERE =====
+    func openShare(_ url: URL) {
+        if let pin = SharedPinLink.pin(from: url) {
+            showSharedPin(pin)
+            return
+        }
+        guard let token = LiveShareLink.token(from: url) else { return }
+===== COPY TO HERE =====
+
+4c. Find func stopFollowing() {. Paste this on the lines right above it:
+
+===== COPY FROM HERE =====
+    /// Drops a shared pin on the map, opens its card, and moves the map there unless a trip is running.
+    func showSharedPin(_ pin: SharedPin) {
+        sharedPin = pin
+        sharedPinDetail = pin
+        guard !navigating else { return }
+        didCenter = true
+        camera = .region(framedRegion(around: pin.coordinate, span: 0.03))
+    }
+
+    func clearSharedPin() {
+        sharedPinDetail = nil
+        sharedPin = nil
+    }
+===== COPY TO HERE =====
+
+Step 5: Theme.swift (2 pastes)
+
+5a. Find static let event = Color( inside enum OvaColor. Paste this on the line right after it:
+
+===== COPY FROM HERE =====
+    /// The orange from the app icon, used for pins people share with you.
+    static let shared = Color(red: 0.94, green: 0.57, blue: 0.25)
+===== COPY TO HERE =====
+
+5b. Find struct PlacePin: View {. Paste this right above it:
+
+===== COPY FROM HERE =====
+/// The pin for a place someone shared with an ovayonder.sunovabit.org/p/ link.
+struct SharedPinMarker: View {
+    var body: some View {
+        Image(systemName: "mappin")
+            .font(.system(size: 17, weight: .bold))
+            .foregroundStyle(.white)
+            .frame(width: 40, height: 40)
+            .background(OvaColor.shared, in: Circle())
+            .overlay { Circle().stroke(.white, lineWidth: 2) }
+            .shadow(color: .black.opacity(0.3), radius: 3, y: 1)
+    }
+}
+===== COPY TO HERE =====
+
+Step 6: DetailSheets.swift and MapScreen.swift
+
+6a. In DetailSheets.swift, find struct EventTrafficCard: View {. Paste this right above it:
+
+===== COPY FROM HERE =====
+/// The card for a place someone shared with you.
+struct SharedPinDetailView: View {
+    let pin: SharedPin
+    /// False during a trip: a new route would replace the one you are driving.
+    let canRoute: Bool
+    let onRoute: () -> Void
+    let onSaveFavorite: () -> Void
+    let onRemove: () -> Void
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            VStack(alignment: .leading, spacing: 16) {
+                HStack(spacing: 12) {
+                    SharedPinMarker()
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Shared with you")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.secondary)
+                        Text(pin.title)
+                            .font(.title.weight(.bold))
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                Text(String(format: "%.5f, %.5f", pin.coordinate.latitude, pin.coordinate.longitude))
+                    .font(.body.monospaced())
+                    .foregroundStyle(.secondary)
+                    .textSelection(.enabled)
+                if canRoute {
+                    Button {
+                        dismiss()
+                        onRoute()
+                    } label: {
+                        Text("Score the drive")
+                            .font(.title3.weight(.semibold))
+                            .frame(maxWidth: .infinity, minHeight: 54)
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+                Button(action: onSaveFavorite) {
+                    Text("Save favorite")
+                        .font(.title3.weight(.semibold))
+                        .frame(maxWidth: .infinity, minHeight: 54)
+                }
+                .buttonStyle(.bordered)
+                Button(role: .destructive) {
+                    dismiss()
+                    onRemove()
+                } label: {
+                    Text("Remove pin")
+                        .font(.title3.weight(.semibold))
+                        .frame(maxWidth: .infinity, minHeight: 54)
+                }
+                .buttonStyle(.bordered)
+                Text(canRoute
+                     ? "Score the drive plans a route here and checks it for flooding, closures, and weather alerts."
+                     : "End your current trip to plan a route to this spot.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 0)
+            }
+            .padding(20)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .navigationTitle("Shared location")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
+    }
+}
+===== COPY TO HERE =====
+
+6b. In MapScreen.swift, find:
+----- FIND THIS LINE (don't copy) -----
+            if let coordinate = model.follow?.payload?.coordinate {
+----- END OF LINE TO FIND -----
+Paste this right above it, inside the Map { … } block with the other pins:
+
+===== COPY FROM HERE =====
+            if let pin = model.sharedPin {
+                Annotation(pin.title, coordinate: pin.coordinate.cl) {
+                    Button {
+                        model.sharedPinDetail = pin
+                    } label: {
+                        SharedPinMarker()
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Shared location, \(pin.title)")
+                }
+            }
+===== COPY TO HERE =====
+
+6c. In MapScreen.swift, find:
+----- FIND THIS LINE (don't copy) -----
+        .sheet(item: $model.selectedPlace) { place in
+----- END OF LINE TO FIND -----
+Paste this right above it:
+
+===== COPY FROM HERE =====
+        .sheet(item: $model.sharedPinDetail) { pin in
+            SharedPinDetailView(
+                pin: pin,
+                canRoute: !model.navigating,
+                onRoute: {
+                    Task { await model.route(to: pin.coordinate, name: pin.title) }
+                },
+                onSaveFavorite: {
+                    model.beginSave(name: pin.title, coordinate: pin.coordinate)
+                },
+                onRemove: { model.clearSharedPin() }
+            )
+            .presentationDetents([.medium, .large])
+            .modifier(LandscapeSheetModifier(active: usesSidePanel))
+        }
+===== COPY TO HERE =====
+
+Step 7: Upload the website (makes the links open the app)
+
+Upload the latest sunovabit-site.zip to public_html in Hostinger, extract with ., and overwrite. That adds:
+- ovayonder.sunovabit.org/.well-known/apple-app-site-association: tells iPhones that /eta/… and /p/… links belong to OvaYonder (Team ID 4L2HGVYY25)
+- ovayonder.sunovabit.org/eta/: a short page for people who don't have the app
+
+Check it: open https://ovayonder.sunovabit.org/.well-known/apple-app-site-association in Safari. You should see text starting with {"applinks".
+
+Step 8: Build and test on your iPhone
+
+1. Upload the website first, then delete OvaYonder from your iPhone and run it again from Xcode. iOS checks the app-link file when the app is installed.
+2. Apple caches the file, so links can take a few hours to start opening the app after the first upload. To skip the wait while testing:
+   - on the iPhone, turn on Settings → Developer → Associated Domains Development
+   - temporarily change the entitlement to applinks:ovayonder.sunovabit.org?mode=developer
+   - put it back before you submit to the App Store
+3. Paste this link into Notes or Messages (not Safari's address bar), then tap it:
+   https://ovayonder.sunovabit.org/p/?lat=29.7604&lng=-95.3698&name=Downtown%20Houston
+   OvaYonder should open, move to downtown Houston, and show the orange pin with its card.
+4. Long-press the link: the menu should offer Open in "OvaYonder".
+5. Run the tests: Product → Test, or cd OvaYonderCore && swift test in Terminal.
+
+For your Share button
+
+To make the link for a pin or saved place:
+----- EXAMPLE -----
+let url = SharedPinLink.webURL(for: SharedPin(coordinate: place.coordinate, name: place.name))
+// https://ovayonder.sunovabit.org/p/?lat=29.7604&lng=-95.3698&name=Downtown%20Houston
+----- END OF EXAMPLE -----
+Pass url to ShareLink or the message text. Names with &, =, +, emoji, and so on are encoded safely.
