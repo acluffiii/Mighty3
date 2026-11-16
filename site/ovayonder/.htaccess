@@ -1,0 +1,29 @@
+# OvaYonder folder settings.
+# This folder is served two ways on Hostinger:
+#   https://sunovabit.org/ovayonder/...      (part of the main site)
+#   https://ovayonder.sunovabit.org/...      (the subdomain's document root is public_html/ovayonder)
+# A RewriteEngine in this folder replaces the parent folder's rewrite rules, so the
+# main site's https and www redirects are repeated here.
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # www.sunovabit.org -> sunovabit.org, always over https
+  RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+  RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
+
+  # http:// -> https://
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+  # On the app subdomain, serve only the app-link pages (shared pins, live ETA, and the
+  # apple-app-site-association file) plus the icon the pin page shows. Everything else
+  # goes to the OvaYonder pages on the main site, keeping the rest of the path.
+  # (REDIRECT_STATUS is set on the server's own internal error-page lookups; leave those alone.)
+  RewriteCond %{ENV:REDIRECT_STATUS} ^$
+  RewriteCond %{HTTP_HOST} ^ovayonder\.sunovabit\.org$ [NC]
+  RewriteCond %{REQUEST_URI} !^/(p|eta|\.well-known)(/|$)
+  RewriteCond %{REQUEST_URI} !^/assets/ovayonder-icon\.jpg$
+  RewriteRule ^(.*)$ https://sunovabit.org/ovayonder/$1 [L,R=301]
+</IfModule>

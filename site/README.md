@@ -8,7 +8,9 @@ dentdog/                DentDOG PDR: product page, support.html, privacy.html
 mowmoney/               Mow Money: product page, support.html, privacy.html
 ovayonder/              OvaYonder: product page, support/, privacy/, terms/ (folder-style URLs)
                         ovayonder/p/ is the shared-location page the app links to:
-                        https://sunovabit.org/ovayonder/p/?lat=29.7604&lng=-95.3698&name=Downtown%20Houston
+                        https://ovayonder.sunovabit.org/p/?lat=29.7604&lng=-95.3698&name=Downtown%20Houston
+                        (the subdomain's folder is public_html/ovayonder; ovayonder/.htaccess forwards every other
+                        subdomain address to sunovabit.org/ovayonder/ and leaves /p/, /eta/ and /.well-known/ alone)
                         (lat/lng required; name optional; no cookies, no tracking; noindex)
 contact/                Contact form (index.html), thank-you page, and send.php, which emails messages to you
 preloader/              Preloader: product page with screenshot gallery, support/, privacy/, terms/ (folder-style URLs). Old /preload/ links redirect here.
