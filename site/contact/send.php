@@ -25,8 +25,19 @@ function go(string $where): void {
     exit;
 }
 
+// Support pages that carry their own copy of the form. A hidden "from" field names the
+// page, so a problem with the message is shown back on that page. Only these paths are used.
+const RETURN_PAGES = [
+    'dentdog'   => '/dentdog/support.html',
+    'mowmoney'  => '/mowmoney/support.html',
+    'preloader' => '/preloader/support/',
+    'ovayonder' => '/ovayonder/support/',
+];
+
 function fail(string $code): void {
-    go('index.html?error=' . $code . '#form');
+    $from = is_string($_POST['from'] ?? null) ? $_POST['from'] : '';
+    $page = RETURN_PAGES[$from] ?? 'index.html';
+    go($page . '?error=' . $code . '#form');
 }
 
 // One line of text: no line breaks (blocks email header injection), trimmed, length-capped.

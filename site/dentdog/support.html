@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DentDOG PDR Support · Sunovabit</title>
-<meta name="description" content="Get help with DentDOG PDR: FAQ and contact information.">
+<meta name="description" content="Get help with DentDOG PDR: FAQ and a contact form.">
 <meta property="og:title" content="DentDOG PDR Support · Sunovabit">
-<meta property="og:description" content="Get help with DentDOG PDR: FAQ and contact information.">
+<meta property="og:description" content="Get help with DentDOG PDR: FAQ and a contact form.">
 <meta name="theme-color" content="#13213a">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://sunovabit.org/assets/img/og-image.png">
@@ -30,13 +30,28 @@
 
 <div class="page-head"><div class="wrap"><span class="eyebrow">DentDOG PDR · Support</span><h1>How can we help?</h1></div></div>
 <section style="padding-top:24px"><div class="wrap prose">
-  <p class="lead">The fastest way to reach us is our contact form. Please include your iPhone model, iOS version, and what happened.</p>
-  <div class="btn-row" style="margin-bottom:40px"><a class="btn btn-primary" href="../contact/?topic=dentdog">Contact DentDOG PDR support</a></div>
-  <p>We usually reply within one to two business days.</p>
+  <p class="lead">Need help with DentDOG PDR? Send us a message below or check the answers to common questions.</p>
+<h2 id="contact">Contact DentDOG PDR support</h2>
+<p>Ask a question, report a problem, or request help using the form below. Please include your iPhone or iPad model, iOS version, and what happened. We usually reply within one to two business days.</p>
+<div id="form-error" class="form-alert" role="alert" hidden></div>
+<form class="contact-form card" id="form" method="post" action="../contact/send.php" style="margin-bottom:16px">
+  <input type="hidden" name="topic" value="dentdog">
+  <input type="hidden" name="from" value="dentdog">
+  <div class="field-row">
+    <label><span>Your name</span><input type="text" name="name" required maxlength="100" autocomplete="name"></label>
+    <label><span>Your email <span class="hint">(so we can reply)</span></span><input type="email" name="email" required maxlength="200" autocomplete="email"></label>
+  </div>
+  <label><span>Device &amp; iOS version <span class="hint">(optional)</span></span><input type="text" name="device" maxlength="120" placeholder="e.g. iPhone 17 Pro, iOS 27"></label>
+  <label><span>How can we help?</span><textarea name="message" required minlength="10" maxlength="5000" rows="6"></textarea></label>
+  <div class="hp" aria-hidden="true"><label>Leave this empty<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+  <button class="btn btn-primary" type="submit">Send message</button>
+  <p class="hint" style="margin:0">We use your name, email, and message only to reply. See our <a href="../privacy.html">privacy policy</a>.</p>
+</form>
+<p style="margin-bottom:32px">You can also reach us from our <a href="../contact/?topic=dentdog">main contact page</a>.</p>
   <h2>Frequently asked questions</h2>
-  <details class="faq"><summary>Which iPhones does DentDOG support?</summary><p>DentDOG runs on iPhones with iOS 16 or later.</p></details><details class="faq"><summary>Why does DentDOG ask for camera access?</summary><p>The camera is how you photograph the damage on each panel. Photos are processed on your iPhone. If you said no by accident, go to Settings → DentDOG → Camera.</p></details><details class="faq"><summary>How do I send an estimate to a customer or adjuster?</summary><p>Tap the share button on the deck. DentDOG makes a PDF of the current vehicle and opens the iOS share sheet so you can AirDrop it, email it, or save it to Files.</p></details><details class="faq"><summary>How do I switch between two vehicles?</summary><p>Tilt the deck by swiping up or down on the front card. While it's tilted, keep swiping sideways to switch to the other vehicle.</p></details><details class="faq"><summary>Does DentDOG connect to Mitchell or CCC?</summary><p>Not yet. Insurer connections are planned for a future update.</p></details><details class="faq"><summary>Is my data backed up?</summary><p>Estimates are stored on your iPhone. Export a PDF of anything you need to keep. Deleting the app deletes its data.</p></details>
+  <details class="faq"><summary>Which iPhones does DentDOG support?</summary><p>DentDOG runs on iPhones with iOS 16 or later.</p></details><details class="faq"><summary>Why does DentDOG ask for camera access?</summary><p>The camera is how you photograph the damage on each panel. Photos are processed on your iPhone. If you said no by accident, go to Settings → DentDOG → Camera.</p></details><details class="faq"><summary>How do I send an estimate to a customer or adjuster?</summary><p>Tap the share button on the deck. DentDOG makes a PDF of the current vehicle and opens the iOS share sheet so you can AirDrop it, email it, or save it to Files.</p></details><details class="faq"><summary>How do I switch between two vehicles?</summary><p>Tilt the deck by swiping up or down on the front card. While it's tilted, keep swiping sideways to switch to the other vehicle.</p></details><details class="faq"><summary>Does DentDOG connect to Mitchell or CCC?</summary><p>Not yet. Insurer connections are planned for a future update.</p></details><details class="faq"><summary>How do I cancel or manage my subscription?</summary><p>Subscriptions are managed by Apple. On your iPhone or iPad, open Settings, tap your name, then Subscriptions, and choose DentDOG PDR. Cancel at least 24 hours before the renewal date to avoid being charged for the next period. For a refund, visit <a href="https://reportaproblem.apple.com" target="_blank" rel="noopener">reportaproblem.apple.com</a>.</p></details><details class="faq"><summary>I bought a subscription but the features are locked. What do I do?</summary><p>Make sure you're signed in with the same Apple Account you used to buy it, then use Restore Purchases in the app. If it still doesn't unlock, send us a message using the form above.</p></details><details class="faq"><summary>Is my data backed up?</summary><p>Estimates are stored on your iPhone. Export a PDF of anything you need to keep. Deleting the app deletes its data.</p></details>
   <h2>More</h2>
-  <ul><li><a href="privacy.html">DentDOG PDR privacy policy</a></li><li><a href="index.html">About DentDOG PDR</a></li></ul>
+  <ul><li><a href="privacy.html">DentDOG PDR privacy policy</a></li><li><a href="terms.html">DentDOG PDR terms of use</a></li><li><a href="index.html">About DentDOG PDR</a></li></ul>
 </div></section>
 
 </main>
@@ -49,8 +64,21 @@
     </div>
     <div><h4>Apps</h4><ul><li><a href="../dentdog/index.html">DentDOG PDR</a></li><li><a href="../mowmoney/index.html">Mow Money</a></li><li><a href="../preloader/index.html">Preloader</a></li><li><a href="../ovayonder/index.html">OvaYonder</a></li></ul></div>
     <div><h4>Support</h4><ul><li><a href="../dentdog/support.html">DentDOG support</a></li><li><a href="../mowmoney/support.html">Mow Money support</a></li><li><a href="../preloader/support/index.html">Preloader support</a></li><li><a href="../ovayonder/support/index.html">OvaYonder support</a></li><li><a href="../contact/">Contact us</a></li></ul></div>
-    <div><h4>Legal</h4><ul><li><a href="../privacy.html">Privacy</a></li><li><a href="../dentdog/privacy.html">DentDOG privacy</a></li><li><a href="../mowmoney/privacy.html">Mow Money privacy</a></li><li><a href="../preloader/privacy/index.html">Preloader privacy</a></li><li><a href="../preloader/terms/index.html">Preloader terms</a></li><li><a href="../ovayonder/privacy/index.html">OvaYonder privacy</a></li><li><a href="../ovayonder/terms/index.html">OvaYonder terms</a></li></ul></div>
+    <div><h4>Legal</h4><ul><li><a href="../privacy.html">Privacy</a></li><li><a href="../dentdog/privacy.html">DentDOG privacy</a></li><li><a href="../dentdog/terms.html">DentDOG terms</a></li><li><a href="../mowmoney/privacy.html">Mow Money privacy</a></li><li><a href="../preloader/privacy/index.html">Preloader privacy</a></li><li><a href="../preloader/terms/index.html">Preloader terms</a></li><li><a href="../ovayonder/privacy/index.html">OvaYonder privacy</a></li><li><a href="../ovayonder/terms/index.html">OvaYonder terms</a></li></ul></div>
   </div>
 </footer>
+<script>
+(function () {
+  var msgs = {
+    missing: 'Please fill in your name, email, and a message of at least 10 characters.',
+    email: "That email address doesn't look right. Please check it and try again.",
+    links: 'Your message has too many links. Please remove some and try again.',
+    rate: "You've sent several messages in a short time. Please wait an hour and try again.",
+    send: "Sorry, your message couldn't be sent right now. Please try again in a few minutes."
+  };
+  var e = new URLSearchParams(location.search).get('error'), box = document.getElementById('form-error');
+  if (e && msgs[e]) { box.textContent = msgs[e]; box.hidden = false; }
+})();
+</script>
 </body>
 </html>
